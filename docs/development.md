@@ -52,7 +52,30 @@ Use descriptive Conventional Commit prefixes (`feat:`, `fix:`, `test:`, `docs:`,
 `chore:`). Keep unrelated refactors out of fixes. Review the staged diff, run relevant
 checks, and include lockfile changes with dependency changes. Never commit secrets,
 local environment files, generated coverage, or build output. Do not amend someone
-else's work or force-push shared history. Push only when requested or authorized.
+else's work or force-push shared history.
+
+For each new work item, start a fresh branch from current `origin/main`, push focused
+commits and open a PR. This workflow is authorized by the project owner. Keep fixes
+to an existing PR on its branch. If dependent work must stack on an unmerged PR,
+explicitly document its base and dependency. Do not merge or push directly to main
+without authorization. Verify remote CI before declaring a PR ready.
+
+## CI and continuous deployment
+
+GitHub Actions runs on pushes and PRs: clean dependency installation, lint,
+TypeScript, UI/server tests with coverage, and production build. Coverage reports
+are retained as artifacts; these are not deployments. Runs have a time limit and
+superseded runs for the same branch/PR are cancelled.
+
+CD is pending the owner's hosting selection and credentials. Proposed flow:
+PR -> checks + isolated preview -> review -> merge -> checks -> production deployment.
+Production deployment should only occur from main after checks pass, with scoped
+secrets and appropriate environment approvals. Do not run untrusted PR code with
+production credentials. Provider configuration, preview URLs, smoke checks and
+rollback procedure must be verified before describing CD as active.
+
+Repository branch protection is not configured by these files. Require the
+`check` job and PR review on main when repository settings/plan permit it.
 
 ## Definition of done
 
