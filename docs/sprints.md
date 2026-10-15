@@ -16,6 +16,12 @@ This skeleton is an initial foundation, not completion of Sprint 1 or Sprint 2.
 | 9 | Client/student portal | Verification/recovery, own-appointment management, profiles, history and authorization tests. |
 | 10 | Paid mentoring | Offerings, payments, slot holds, verified payment events, resources and cancellation/refund policies. |
 
+## Current sprint
+
+Sprint 1 has a [review packet](sprint-01/README.md) covering scope, responsive
+wireframes, backlog, and architecture. It remains in review until the owner confirms
+business policies and the proposed design.
+
 ## Launch acceptance
 
 A visitor can book, receive confirmation, reschedule and cancel. Calendar and
