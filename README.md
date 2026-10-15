@@ -38,6 +38,12 @@ CI runs the full check and retains coverage reports.
 external-service readiness. Database integration and browser E2E suites will be
 added with their features; they are not implemented by this testing foundation.
 
+## Hosting direction
+
+Selected development hosting: Render Free for the Next.js app and backend, with
+Neon Free for PostgreSQL. Neither is connected yet; CD setup remains pending.
+See [architecture](docs/architecture.md) for launch and background-job decisions.
+
 ## Optional local database
 
 With Docker installed, `npm run db:up` starts PostgreSQL on localhost:5432.
