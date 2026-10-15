@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: griffamdev
+      POSTGRES_PASSWORD: local-development-only
+      POSTGRES_DB: griffamdev
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - griffamdev_postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U griffamdev -d griffamdev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+volumes:
+  griffamdev_postgres:
