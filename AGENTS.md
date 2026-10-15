@@ -7,3 +7,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## GriffamDev project conventions
+
+Read `docs/development.md` for module boundaries, test placement and commit practices.
+Use focused conventional commits and `codex/` branches. Keep route handlers thin;
+colocate feature tests, and use Node for backend tests and jsdom for UI tests.
+Run `npm run check` before committing code changes. Never include credentials,
+generated reports, or unrelated user edits in a commit.

@@ -22,8 +22,21 @@ npm run check
 npm run lint
 ```
 
-`check` generates route types, checks TypeScript, and creates a production build.
+`check` runs lint, generates route types, checks TypeScript, runs tests with coverage,
+and creates a production build.
 `npm start` serves that build. Dependencies are locked in package-lock.json.
+
+## Tests and project conventions
+
+See [development conventions](docs/development.md) for structure, test layers and commits.
+Run `npm test` for all tests, `npm run test:watch` during development,
+`npm run test:ui` for React tests, or `npm run test:server` for Node tests.
+`npm run test:coverage` generates a scoped V8 report in `coverage/`.
+CI runs the full check and retains coverage reports.
+
+`GET /api/health` provides process liveness only; it does not check database or
+external-service readiness. Database integration and browser E2E suites will be
+added with their features; they are not implemented by this testing foundation.
 
 ## Optional local database
 
