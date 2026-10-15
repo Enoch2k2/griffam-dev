@@ -49,8 +49,21 @@ Chess must remain playable if AI chat fails. Validate moves through the rules
 engine; ground explanations in current position and analysis. Rate-limit AI calls
 and enforce budgets. Never expose model credentials to the browser.
 
+## Hosting decision
+
+Use Render Free for the Next.js Node web service (public UI and backend together)
+and Neon Free for managed PostgreSQL during development. This is an approved
+provider choice, not an active deployment or database connection. Keep the optional
+local PostgreSQL setup for development and isolated database tests.
+
+Before client-facing launch, review an always-on paid Render service, database
+backup/recovery needs, and usage limits. Free hosting does not provide the durable
+worker execution required for reliable reminders: choose and verify a job runner
+before enabling notifications. Do not use in-process timers in a sleeping service.
+Media/object storage, email delivery and AI remain separate provider decisions.
+
 ## Open decisions
 
-Authentication library; database access/migrations; database and file hosting;
+Authentication library; database access/migrations; file hosting;
 email provider and background worker; editor; chess engine deployment/licensing;
-AI provider/model; deployment platform. Resolve these in their relevant sprint.
+AI provider/model; durable job execution and deployment configuration. Resolve these in their relevant sprint.

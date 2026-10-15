@@ -1,6 +1,6 @@
 # Sprint 1 — Scope and design
 
-Status: **Review-ready draft; awaiting Enoch’s business decisions and design review.**
+Status: **Layout direction and core preferences accepted; remaining booking policies and technical prerequisites are open.**
 Owner: Enoch Griffith · GriffamDev · Full Stack Software Engineer
 
 ## Objective
@@ -28,14 +28,21 @@ This sprint produces specifications, not working booking, AI, or account feature
 - Playable chess with conversational AI must ship with the public website.
 - Public client/student accounts and paid mentoring follow the initial public launch.
 
-## Proposed defaults — not yet business commitments
+## Confirmed preferences
+
+- Audience: a mix of small businesses, startups and engineering teams.
+- Keep the current layout direction for now; it may evolve.
+- Free 30-minute project discovery calls, 30-minute buffers and 24-hour minimum notice.
+- Describe the call as discussing project needs and fit; paid consulting is not an established offering.
+- Render Free for the Next.js app/backend and Neon Free for PostgreSQL during development.
+
+Buffer placement (before, after, or both) still needs definition before implementation.
+Keep availability configurable and booking disabled until actual hours/time zone are set.
+
+## Remaining proposed defaults — not yet business commitments
 
 | Decision | Proposed starting point | Status |
 | --- | --- | --- |
-| Primary audience | Small businesses seeking custom software | Awaiting Enoch |
-| Free consultation | 30 minutes | Awaiting Enoch |
-| Buffer | 15 minutes after an appointment | Awaiting Enoch |
-| Minimum notice | 24 hours | Awaiting Enoch |
 | Booking horizon | Next 30 days | Awaiting Enoch |
 | Time zone and weekly hours | Owner supplies IANA time zone and actual availability | Awaiting Enoch |
 | Reminders | 24 hours and 1 hour before; skip times already passed | Awaiting Enoch |
@@ -43,7 +50,7 @@ This sprint produces specifications, not working booking, AI, or account feature
 | Chess | Guest play, three difficulty presets, optional coaching | Proposed launch scope |
 | AI budget | Hard server-side request and cost ceilings | Amount and model pending evaluation |
 
-No proposed times or policies are published or enforced by this sprint.
+No booking times or policies are published or enforced by this documentation update.
 
 ## Content inputs needed before launch
 
@@ -61,8 +68,9 @@ No proposed times or policies are published or enforced by this sprint.
 - [x] Write prioritized stories, dependencies, and testable acceptance criteria.
 - [x] Document architecture boundaries and conceptual data relationships.
 - [x] Record unknowns and business-policy proposals.
-- [ ] Enoch confirms audience and consultation availability/policies.
-- [ ] Enoch reviews the proposed wireframes and scope.
+- [x] Enoch confirms audience and accepts the current layout direction.
+- [x] Confirm call duration, buffer length, minimum notice and development hosting.
+- [ ] Confirm actual availability, time zone, buffer placement and remaining booking policies.
 - [ ] Resolve Sprint 2 technical prerequisites: auth library, database access tool, hosting/worker execution plan.
 
 Do not mark Sprint 1 complete merely because the review packet exists. Provider

@@ -5,7 +5,9 @@
 GriffamDev is the professional home of Enoch Griffith, Full Stack Software Engineer.
 The site should turn technical ability into evidence a prospective client can inspect.
 Draft promise: “I build web applications, custom tools, and AI-powered experiences.”
-Specific services and audience wording remain subject to Enoch’s confirmation.
+Target clients include a mix of small businesses, startups and engineering teams.
+Specific service copy remains subject to Enoch’s confirmation. Free project discovery
+calls discuss needs and fit; paid consulting is not an established offering.
 
 ## Audience and tasks
 

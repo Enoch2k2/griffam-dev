@@ -67,7 +67,8 @@ TypeScript, UI/server tests with coverage, and production build. Coverage report
 are retained as artifacts; these are not deployments. Runs have a time limit and
 superseded runs for the same branch/PR are cancelled.
 
-CD is pending the owner's hosting selection and credentials. Proposed flow:
+Render Free (Next.js web service) and Neon Free (PostgreSQL) are selected for
+development. CD is pending provider setup, credentials and verification. Proposed flow:
 PR -> checks + isolated preview -> review -> merge -> checks -> production deployment.
 Production deployment should only occur from main after checks pass, with scoped
 secrets and appropriate environment approvals. Do not run untrusted PR code with

@@ -12,6 +12,7 @@ Status: planning specification. No schema migrations or integrations are impleme
 | Google Calendar adapter | Owner continues using existing business calendar | Local state and external events need reconciliation and idempotency |
 | Separate game engine and conversational AI | Legal play is deterministic; explanations are probabilistic | Model responses never directly mutate authoritative game state |
 | Durable notification outbox | Email should not disappear when a request/process fails | Requires a scheduled worker/runner, not in-memory timers |
+| Render Free + Neon Free for development | Owner-approved hosting choice | Run Next.js UI and backend in one Node service; connect to managed PostgreSQL server-side; provisioning and CD remain pending |
 | Root-level theme tokens | All pages inherit consistent appearance | Existing persistent light/cyberpunk toggle remains shared |
 
 ## Conceptual data model
@@ -84,8 +85,8 @@ notifications and app messages without a deliberate notification policy.
 | --- | --- | --- |
 | Authentication library | Sprint 2 | Maintained Next.js support, server sessions, verified identity, owner provisioning/recovery |
 | SQL/data access tooling | Sprint 2 | Versioned migrations, transactions, PostgreSQL constraints, inspectable queries |
-| Hosting + durable worker | Sprint 2 | Node compatibility, scheduled execution, retries, secrets, predictable costs |
-| Managed PostgreSQL / object storage | Sprint 2–4 | Backups, least-privilege access, private drafts, public assets |
+| Render/Neon setup + durable worker | Sprint 2 | Configure selected providers and environments; resolve scheduled execution separately from the sleeping free web service |
+| Neon configuration / object storage choice | Sprint 2–4 | Database access and recovery; separate storage for private drafts and public assets |
 | Editor primitive | Sprint 4 | Structured content, safe rendering, code blocks, accessible editing |
 | Email provider | Sprint 3 basic / 8 full | Domain authentication, delivery events, sandbox support, costs |
 | Rules library / engine | Sprint 6 | Rules completeness, worker execution, license obligations and distribution approach |
@@ -93,4 +94,5 @@ notifications and app messages without a deliberate notification policy.
 
 Do not select paid plans or provision accounts as part of planning. Inspect current
 official documentation and run focused compatibility spikes when making these choices.
-The stack is established; vendor choices remain explicit open decisions, not promises.
+The stack and development hosting providers are established; remaining vendor choices
+are explicit open decisions. No hosting accounts or services have been provisioned.
