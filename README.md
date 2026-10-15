@@ -42,6 +42,7 @@ connect to this database; schema, migrations, and data access are Sprint 2 work.
 - `src/config/site.ts` — verified identity, domain, LinkedIn, and navigation.
 - `docs/architecture.md` — boundaries and implementation decisions.
 - `docs/sprints.md` — agreed delivery sequence and remaining acceptance criteria.
+- `docs/sprint-01/README.md` — Sprint 1 review packet, wireframes, backlog and decisions.
 
 ## Current scope
 
