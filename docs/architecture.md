@@ -4,7 +4,8 @@
 
 Next.js App Router with server components by default, React, strict TypeScript,
 Tailwind CSS, npm lockfile, and PostgreSQL. Keep a single application initially.
-No hosted deployment, Google account connection, or domain changes are part of the skeleton.
+Neon PostgreSQL is connected. The website is not deployed, Google OAuth credentials
+are pending, and no domain changes have been made.
 
 ## Build ourselves
 
@@ -14,10 +15,11 @@ queue and templates; chess interface and conversation orchestration; mentoring w
 
 ## Use dependable primitives
 
-Choose an established authentication library before implementing sessions.
+Use Better Auth for owner Google sign-in and database-backed sessions; Drizzle ORM
+and node-postgres for queries and versioned SQL migrations.
 Use Google Calendar API for free/busy and events, a chess rules library and engine
 for legal moves, a language model for conversation, an email provider for delivery,
-and a payment processor for payments. Providers and SDKs are not selected or installed yet.
+and a payment processor for payments. Calendar, email, AI and payment providers/SDKs remain future work.
 
 ## Feature boundaries to add as implementation begins
 
@@ -40,8 +42,8 @@ cancel obsolete reminders after changes. Confirm paid appointments only after a
 verified payment event, with reservation expiration and recovery rules.
 
 Authorization belongs on every server-side read and mutation. Separate public
-published content from drafts and private client data. Admin and dashboard routes
-remain inert until authentication and role/ownership checks exist. Keep Google
+published content from drafts and private client data. Admin access checks the configured verified owner on every request. Client dashboard
+routes remain inert until their authentication and ownership checks exist. Keep Google
 refresh tokens and all API credentials server-side. Validate uploaded content,
 file size/type, and render article content safely.
 
@@ -52,8 +54,7 @@ and enforce budgets. Never expose model credentials to the browser.
 ## Hosting decision
 
 Use Render Free for the Next.js Node web service (public UI and backend together)
-and Neon Free for managed PostgreSQL during development. This is an approved
-provider choice, not an active deployment or database connection. Keep the optional
+and Neon Free for managed PostgreSQL during development. Provider setup and deployment verification are tracked in `docs/sprint-02/README.md`. Keep the optional
 local PostgreSQL setup for development and isolated database tests.
 
 Before client-facing launch, review an always-on paid Render service, database
@@ -64,6 +65,6 @@ Media/object storage, email delivery and AI remain separate provider decisions.
 
 ## Open decisions
 
-Authentication library; database access/migrations; file hosting;
+File hosting;
 email provider and background worker; editor; chess engine deployment/licensing;
 AI provider/model; durable job execution and deployment configuration. Resolve these in their relevant sprint.

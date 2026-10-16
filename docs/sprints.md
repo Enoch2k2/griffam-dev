@@ -18,9 +18,9 @@ This skeleton is an initial foundation, not completion of Sprint 1 or Sprint 2.
 
 ## Current sprint
 
-Sprint 1 has a [review packet](sprint-01/README.md) covering scope, responsive
-wireframes, backlog, and architecture. It remains in review until the owner confirms
-business policies and the proposed design.
+Sprint 2 is underway: see the [foundation checklist](sprint-02/README.md).
+Sprint 1 layout direction, audience and core booking preferences are accepted.
+Actual availability and remaining booking policies stay open for the booking sprint.
 
 ## Launch acceptance
 

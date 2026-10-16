@@ -20,8 +20,10 @@ Avoid generic utility folders, catch-all services, and unnecessary abstractions.
   Query by accessible role/name and test observable interactions, not implementation snapshots.
 - Vitest server project: native Node environment with Request/Response; no DOM mocks.
   The initial health test calls the handler directly; it is not a live HTTP E2E test.
-- Future PostgreSQL integration tests: isolated disposable test database, migrations,
-  ownership constraints, transactions and concurrent bookings. Never point tests at production.
+- PostgreSQL integration tests: isolated disposable databases, migration reruns, auth
+  constraints, provisioning hooks and signed-session expiry/revocation. CI requires
+  TEST_DATABASE_URL; local runs skip these tests when it is absent. Booking concurrency
+  tests arrive with booking. Never point tests at production.
 - Future Playwright E2E: running Next.js app, navigation/hydration, async server components,
   calendar and booking journeys. Not installed or claimed covered by the initial test suite.
 
@@ -41,7 +43,7 @@ npm run test:coverage     # V8 report: terminal, coverage/index.html and lcov
 npm run check            # Lint, typecheck, tests, production build
 ```
 
-Coverage currently targets the theme toggle and API handlers, not the whole site.
+Coverage targets theme/auth UI, auth server modules and API handlers, not the whole site.
 Expand coverage scope as executable feature logic is added; do not interpret this
 report as proof that planned features exist or that visual layouts are tested.
 
@@ -68,7 +70,7 @@ are retained as artifacts; these are not deployments. Runs have a time limit and
 superseded runs for the same branch/PR are cancelled.
 
 Render Free (Next.js web service) and Neon Free (PostgreSQL) are selected for
-development. CD is pending provider setup, credentials and verification. Proposed flow:
+development. Neon is connected; CD is pending Render setup, credentials and verification. Proposed flow:
 PR -> checks + isolated preview -> review -> merge -> checks -> production deployment.
 Production deployment should only occur from main after checks pass, with scoped
 secrets and appropriate environment approvals. Do not run untrusted PR code with
