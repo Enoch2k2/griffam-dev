@@ -1,14 +1,46 @@
-import { SectionPage } from "@/components/section-page";
+import { Suspense } from "react";
+import Link from "next/link";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { getAdminAccess } from "@/server/auth/access";
+import { AuthButton } from "@/features/auth/auth-button";
 export const metadata = { title: "Admin" };
+
 export default function Page() {
+  return (
+    <Suspense
+      fallback={
+        <div className="shell">
+          <main id="main">
+            <p role="status">Checking owner access…</p>
+          </main>
+        </div>
+      }
+    >
+      <AdminContent />
+    </Suspense>
+  );
+}
+
+async function AdminContent() {
+  const access = await getAdminAccess(await headers());
+  if (access.status !== "authorized") redirect("/admin/sign-in");
   return (
     <div className="shell">
       <main id="main">
-        <SectionPage
-          eyebrow="GriffamDev / admin"
-          title="Administration is not enabled."
-          description="This placeholder contains no private data or management actions. Authentication and authorization must be implemented before admin features are added."
-        />
+        <section className="page-section">
+          <p className="eyebrow">GriffamDev / administration</p>
+          <h1>Welcome, {access.user.name}.</h1>
+          <p className="lead">Your owner access is active.</p>
+          <p>
+            Publishing, bookings and media management will be added in their
+            upcoming sprints.
+          </p>
+          <div className="actions">
+            <AuthButton action="sign-out" />
+            <Link href="/">View website</Link>
+          </div>
+        </section>
       </main>
     </div>
   );
