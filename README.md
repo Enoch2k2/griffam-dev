@@ -2,8 +2,8 @@
 
 Enoch Griffith — Full Stack Software Engineer.
 
-Local project skeleton for griffamdev.dev. Next.js App Router, React, TypeScript,
-Tailwind CSS, and planned PostgreSQL persistence. No live services are connected.
+Project foundation for griffamdev.dev. Next.js App Router, React, TypeScript,
+Tailwind CSS, and PostgreSQL persistence through Drizzle. Neon PostgreSQL is connected; Render and Google OAuth setup are pending.
 
 ## Run locally
 
@@ -15,7 +15,7 @@ npm run dev
 ```
 
 Open the local URL printed by Next.js. No environment variables or database are
-required for the current static pages.
+required for public pages. Owner sign-in requires the settings in `.env.example`.
 
 ```sh
 npm run check
@@ -35,13 +35,13 @@ Run `npm test` for all tests, `npm run test:watch` during development,
 CI runs the full check and retains coverage reports.
 
 `GET /api/health` provides process liveness only; it does not check database or
-external-service readiness. Database integration and browser E2E suites will be
-added with their features; they are not implemented by this testing foundation.
+external-service readiness. `GET /api/ready` checks the database and migrated user table without returning data.
+PostgreSQL integration tests run in CI; browser OAuth verification needs credentials.
 
 ## Hosting direction
 
 Selected development hosting: Render Free for the Next.js app and backend, with
-Neon Free for PostgreSQL. Neither is connected yet; CD setup remains pending.
+Neon Free for PostgreSQL. CD setup remains pending.
 See [architecture](docs/architecture.md) for launch and background-job decisions.
 
 ## Optional local database
@@ -49,8 +49,8 @@ See [architecture](docs/architecture.md) for launch and background-job decisions
 With Docker installed, `npm run db:up` starts PostgreSQL on localhost:5432.
 Copy `.env.example` to `.env.local` when database integration starts.
 `npm run db:down` stops the database without deleting its volume.
-The supplied credentials are for local development only. The app does not yet
-connect to this database; schema, migrations, and data access are Sprint 2 work.
+The supplied credentials are for local development only. Run `npm run db:migrate` to create the auth schema. See
+[deployment and recovery](docs/deployment.md) for environment settings and integration tests.
 
 ## Structure
 
@@ -71,10 +71,12 @@ booking, AI chess, sign-in, dashboard, and administration. The contact page link
 to Enoch's real LinkedIn; no email address, resume, client results, or credentials
 have been invented. The wordmark and G favicon are temporary until the logo arrives.
 
-Authentication, authorization, content persistence, forms, bookings, calendar
-sync, email sending, payments, playable chess, and AI chat are NOT implemented.
+Owner-only Google authentication and server authorization are implemented but require
+provider configuration and live OAuth verification. Public accounts, content publishing,
+forms, bookings, calendar sync, email sending, payments, playable chess and AI chat
+are NOT implemented.
 The scaffold must not be treated as a protected client portal. Route groups do
-not provide access control. No user data is collected. Search indexing is disabled
+not provide access control. Configured owner sign-in stores the owner profile and session records. Search indexing is disabled
 in root metadata until the public launch review.
 
 ## Verification notes
