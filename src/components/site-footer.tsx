@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { site } from "@/config/site";
+import { BrandLogo } from "@/components/brand-logo";
 export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div>
-        <strong>{site.name}</strong>
+        <BrandLogo />
         <p>
           {site.owner} · {site.title}
         </p>

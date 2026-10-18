@@ -51,13 +51,94 @@ button:focus-visible {
   padding: 30px 0;
   border-bottom: 1px solid var(--line);
 }
-.wordmark {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -1.2px;
+.brand-logo {
+  width: 180px;
+  flex-shrink: 0;
 }
-.wordmark span {
-  color: var(--highlight);
+.brand-logo-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #070a12;
+  color: #e8fbff;
+}
+.brand-logo-image {
+  width: 100%;
+  height: auto;
+}
+.brand-logo-fallback {
+  display: none;
+  font-weight: 700;
+  font-size: 24px;
+}
+.brand-animation-toggle {
+  display: block;
+  margin: 4px auto 0;
+  padding: 6px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.brand-logo[data-animation-hidden="true"] .brand-logo-image {
+  display: none;
+}
+.brand-logo[data-animation-hidden="true"] .brand-logo-fallback {
+  display: inline;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo-image, .brand-animation-toggle {
+    display: none;
+  }
+  .brand-logo-fallback {
+    display: inline;
+  }
+}
+.hero.hero-with-portrait, .about-with-portrait {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 340px);
+  align-items: center;
+  gap: 56px;
+  max-width: none;
+}
+.hero-with-portrait h1 {
+  font-size: clamp(40px, 5vw, 64px);
+}
+.owner-portrait {
+  margin: 0;
+  width: 100%;
+  max-width: 360px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--featured-surface);
+}
+.owner-portrait img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  object-position: center 45%;
+}
+.owner-portrait figcaption {
+  padding: 18px 20px;
+}
+.owner-portrait strong {
+  display: block;
+  font-size: 16px;
+}
+.owner-portrait figcaption span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 6px;
 }
 .site-header nav,
 .header-actions,
@@ -274,6 +355,10 @@ h3 {
   top: 10px;
 }
 @media (max-width: 760px) {
+  .hero.hero-with-portrait, .about-with-portrait {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
   .shell {
     padding: 0 22px;
   }
@@ -371,9 +456,6 @@ h3 {
     linear-gradient(to right, rgb(41 232 255 / 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgb(41 232 255 / 0.04) 1px, transparent 1px);
   background-size: 32px 32px;
-}
-[data-theme="cyberpunk"] .wordmark {
-  text-shadow: 0 0 18px rgb(41 232 255 / 0.2);
 }
 [data-theme="cyberpunk"] .eyebrow {
   color: var(--neon-cyan);

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { site } from "@/config/site";
+import { OwnerPortrait } from "@/components/owner-portrait";
 const areas = [
   {
     number: "01",
@@ -26,31 +27,34 @@ const areas = [
 export default function Home() {
   return (
     <>
-      <section className="hero">
-        <p className="eyebrow">
-          {site.owner} / {site.title}
-        </p>
-        <h1>
-          Thoughtful software.
-          <br />
-          <span>Built from end to end.</span>
-        </h1>
-        <p className="lead">
-          I’m Enoch, the engineer behind GriffamDev. I build web applications,
-          custom tools, and AI-powered experiences.
-        </p>
-        <div className="actions">
-          <Link className="button" href="/work">
-            Explore my work <span aria-hidden="true">↗</span>
-          </Link>
-          <Link className="text-link" href="/about">
-            Meet the engineer →
-          </Link>
+      <section className="hero hero-with-portrait">
+        <div>
+          <p className="eyebrow">
+            {site.owner} / {site.title}
+          </p>
+          <h1>
+            Thoughtful software.
+            <br />
+            <span>Built from end to end.</span>
+          </h1>
+          <p className="lead">
+            I’m Enoch, the engineer behind GriffamDev. I build web applications,
+            custom tools, and AI-powered experiences.
+          </p>
+          <div className="actions">
+            <Link className="button" href="/work">
+              Explore my work <span aria-hidden="true">↗</span>
+            </Link>
+            <Link className="text-link" href="/about">
+              Meet the engineer →
+            </Link>
+          </div>
+          <p className="preview-note">
+            The foundation is taking shape. Projects, booking, and learning
+            experiences are in development.
+          </p>
         </div>
-        <p className="preview-note">
-          The foundation is taking shape. Projects, booking, and learning
-          experiences are in development.
-        </p>
+        <OwnerPortrait />
       </section>
       <section className="overview" aria-labelledby="overview-title">
         <div className="section-heading">
