@@ -1,14 +1,12 @@
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { navigation, site } from "@/config/site";
+import { navigation } from "@/config/site";
+import { BrandLogo } from "@/components/brand-logo";
 
 export function SiteHeader() {
   return (
     <header className="site-header">
-      <Link className="wordmark" href="/" aria-label="GriffamDev home">
-        {site.name}
-        <span aria-hidden="true">.</span>
-      </Link>
+      <BrandLogo />
       <nav aria-label="Main navigation">
         {navigation.map((item) => (
           <Link key={item.href} href={item.href}>
