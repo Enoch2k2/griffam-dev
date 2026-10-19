@@ -7,7 +7,7 @@ export function BrandLogo() {
       <Link href="/" aria-label="GriffamDev home" className="brand-logo-link">
         <Image
           className="brand-logo-image"
-          src="/images/griffamdev-logo.gif"
+          src="/images/griffamdev-mark.gif"
           alt=""
           width={640}
           height={360}
