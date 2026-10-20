@@ -6,6 +6,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { makeSignature } from "better-auth/crypto";
 import { createDatabase } from "../../src/server/db/connection";
 import * as schema from "../../src/server/db/schema";
+import { saveInquiry } from "../../src/server/inquiries/store";
 import { createAuth } from "../../src/server/auth/create-auth";
 
 const testURL = process.env.TEST_DATABASE_URL;
@@ -40,6 +41,7 @@ describe.skipIf(!testURL)("PostgreSQL migrations and authentication", () => {
     auth = createAuth(database.db, config);
   });
   beforeEach(async () => {
+    await database.db.delete(schema.inquiry);
     await database.db.delete(schema.user);
     await database.db.delete(schema.verification);
   });
@@ -194,4 +196,26 @@ describe.skipIf(!testURL)("PostgreSQL migrations and authentication", () => {
     );
     expect(response.status).toBe(403);
   });
+  const inquiryData = () => ({ id: randomUUID(), name: "Test", email: "test@example.com", service: "Web application", message: "A project description long enough to be valid." });
+  it("persists one inquiry for concurrent retries and rejects key reuse with changed data", async () => {
+    const data = inquiryData();
+    expect(await Promise.all(Array.from({ length: 5 }, () => saveInquiry(database.db, data)))).toEqual(Array(5).fill("saved"));
+    expect(await database.db.select().from(schema.inquiry)).toHaveLength(1);
+    expect(await saveInquiry(database.db, { ...data, message: "Different message with the same reference" })).toBe("conflict");
+  });
+  it("enforces sender limits under concurrent submissions and allows safe retries", async () => {
+    const data = inquiryData();
+    expect(await saveInquiry(database.db, data)).toBe("saved");
+    const results = await Promise.all(Array.from({ length: 5 }, () => saveInquiry(database.db, inquiryData())));
+    expect(results.filter(result => result === "saved")).toHaveLength(2);
+    expect(results.filter(result => result === "limited")).toHaveLength(3);
+    expect(await saveInquiry(database.db, data)).toBe("saved");
+  });
+  it("enforces the global inbox limit and expires old submissions from the rate window", async () => {
+    await database.db.insert(schema.inquiry).values(Array.from({ length: 60 }, (_, i) => ({ ...inquiryData(), email: `test${i}@example.com`, requestHash: "fixture" })));
+    expect(await saveInquiry(database.db, inquiryData())).toBe("limited");
+    await database.db.update(schema.inquiry).set({ createdAt: new Date(Date.now() - 7200000) });
+    expect(await saveInquiry(database.db, inquiryData())).toBe("saved");
+  });
+
 });

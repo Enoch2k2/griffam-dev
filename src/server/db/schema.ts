@@ -9,6 +9,23 @@ import {
 
 const date = (name: string) => timestamp(name, { withTimezone: true });
 
+export const inquiry = pgTable(
+  "inquiry",
+  {
+    id: text("id").primaryKey(),
+    requestHash: text("request_hash").notNull(),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    service: text("service").notNull(),
+    message: text("message").notNull(),
+    createdAt: date("created_at").notNull().defaultNow(),
+  },
+  (table) => [
+    index("inquiry_created_idx").on(table.createdAt),
+    index("inquiry_email_created_idx").on(table.email, table.createdAt),
+  ],
+);
+
 export const user = pgTable("auth_user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),

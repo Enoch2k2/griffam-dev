@@ -37,6 +37,7 @@ async function AdminContent() {
             upcoming sprints.
           </p>
           <div className="actions">
+            <Link className="button" href="/admin/inquiries">Project inquiries</Link>
             <AuthButton action="sign-out" />
             <Link href="/">View website</Link>
           </div>
