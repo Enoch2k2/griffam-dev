@@ -50,7 +50,7 @@ export default function Home() {
             </Link>
           </div>
           <p className="preview-note">
-            The foundation is taking shape. Projects, booking, and learning
+            Explore selected projects and get in touch. Booking and learning
             experiences are in development.
           </p>
         </div>

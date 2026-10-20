@@ -1,8 +1,8 @@
 # Sprint 2 — Foundation
 
 Status: foundation implemented; Neon production branch connected and migrated.
-Render deployment and real Google sign-in remain unverified until hosting and OAuth
-credentials are configured. The website has not launched.
+Render and Google OAuth are configured. The owner reported successful owner sign-in,
+non-owner rejection, logout and rollback testing on 2026-10-20. The website has not launched.
 
 ## Decisions
 
@@ -31,10 +31,9 @@ credentials are configured. The website has not launched.
 
 ## Remaining exit criteria
 
-- Google owner sign-in is confirmed; configure Google OAuth client credentials.
-- Connect Render, verify a development URL and the Google callback end to end.
-- Demonstrate rejected non-owner sign-in, logout and recovery against the deployed service.
-- Verify CI-gated deployment, migration failure behavior and rollback procedure.
+- Recheck CI-gated auto-deploy after the reported rollback exercise.
+- Verify migration failure behavior separately; a successful rollback alone does not
+  prove database recovery.
 - Provision isolated PR previews if needed; automatic previews are deliberately absent
   until environment/database isolation is configured. Never copy live credentials to PR code.
 - Review Neon backup/recovery and paid Render requirements before public launch.

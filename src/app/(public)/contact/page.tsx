@@ -1,23 +1,14 @@
-import { SectionPage } from "@/components/section-page";
+import { InquiryForm } from "@/features/inquiries/inquiry-form";
 import { site } from "@/config/site";
-export const metadata = { title: "Contact" };
-const content = {
-  eyebrow: "Contact",
-  title: "Start a conversation.",
-  description:
-    "You can connect with Enoch Griffith on LinkedIn while the inquiry form is being built.",
-  items: ["Project inquiry form", "Email confirmation of your inquiry"],
-  links: [],
-};
-export default function Page() {
+export const metadata = { title: "Contact", description: "Tell Enoch Griffith about your web application, integration, or AI project." };
+export default function Contact() {
   return (
-    <>
-      <SectionPage {...content} />
-      <p className="contact-link">
-        <a href={site.linkedin} target="_blank" rel="noopener noreferrer">
-          Connect on LinkedIn ↗
-        </a>
-      </p>
-    </>
+    <section className="page-section">
+      <p className="eyebrow">Let’s connect</p>
+      <h1>Start with the problem.</h1>
+      <p className="lead">Have an idea, a workflow to improve, or an application that needs attention? Tell me what you have in mind and we can discuss whether we’re a good fit.</p>
+      <InquiryForm />
+      <p className="body-copy">Prefer another way to connect? <a href={site.linkedin} target="_blank" rel="noopener noreferrer">Message me on LinkedIn ↗</a></p>
+    </section>
   );
 }

@@ -2,7 +2,8 @@
 
 Selected providers: Render Free + Neon Free. Neon project `calm-smoke-53086671`
 (`GriffamDev Website`) is linked to its `production` branch at the owner's request.
-PostgreSQL is connected and migrated; Render and Google OAuth setup remain pending.
+PostgreSQL, Render and Google owner OAuth are configured. The canonical site URL is
+`https://www.griffamdev.dev`; the root domain redirects there.
 The public website stays noindex until launch review.
 
 ## Local setup
@@ -78,7 +79,8 @@ Keep Blueprint auto-sync under operator control when reviewing infrastructure ch
 Automatic PR previews are not enabled. For a trusted preview, create a separate
 service and Neon database/branch, unique auth secret and explicit OAuth callback.
 Never let untrusted PR code access shared credentials. Verify current free quotas
-before creating additional services. Do not connect griffamdev.dev yet.
+before creating additional services. The custom domain is connected; keep OAuth
+callback URLs aligned with the canonical www domain.
 
 ## Verification before calling deployment complete
 

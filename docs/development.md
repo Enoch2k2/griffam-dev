@@ -70,8 +70,9 @@ are retained as artifacts; these are not deployments. Runs have a time limit and
 superseded runs for the same branch/PR are cancelled.
 
 Render Free (Next.js web service) and Neon Free (PostgreSQL) are selected for
-development. Neon is connected; CD is pending Render setup, credentials and verification. Proposed flow:
-PR -> checks + isolated preview -> review -> merge -> checks -> production deployment.
+development. Neon and Render are connected. Recheck Render auto-deploy after rollback
+exercises, because rollback can disable it. Isolated PR previews are still pending.
+Flow: PR -> checks -> review -> merge -> main checks -> Render deployment.
 Production deployment should only occur from main after checks pass, with scoped
 secrets and appropriate environment approvals. Do not run untrusted PR code with
 production credentials. Provider configuration, preview URLs, smoke checks and

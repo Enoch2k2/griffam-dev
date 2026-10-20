@@ -18,7 +18,9 @@ This skeleton is an initial foundation, not completion of Sprint 1 or Sprint 2.
 
 ## Current sprint
 
-Sprint 2 is underway: see the [foundation checklist](sprint-02/README.md).
+Sprint 3 is underway: see the [public website checklist](sprint-03/README.md).
+Sprint 2 implementation is deployed; remaining operational checks are tracked in the
+[foundation checklist](sprint-02/README.md).
 Sprint 1 layout direction, audience and core booking preferences are accepted.
 Actual availability and remaining booking policies stay open for the booking sprint.
 

@@ -2,7 +2,7 @@ export const site = {
   name: "GriffamDev",
   owner: "Enoch Griffith",
   title: "Full Stack Software Engineer",
-  url: "https://griffamdev.dev",
+  url: "https://www.griffamdev.dev",
   linkedin: "https://www.linkedin.com/in/enochgriffith/",
 } as const;
 
