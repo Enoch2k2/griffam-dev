@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+vi.mock("@/server/email/immediate", () => ({ scheduleInquiryEmails: vi.fn() }));
+import { scheduleInquiryEmails } from "@/server/email/immediate";
 vi.mock("@/server/db", () => ({ getDatabase: vi.fn(() => ({})) }));
 vi.mock("@/server/inquiries/store", () => ({ saveInquiry: vi.fn() }));
 import { saveInquiry } from "@/server/inquiries/store";
@@ -18,6 +20,13 @@ describe("public inquiry endpoint", () => {
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(await response.json()).toEqual({ status: "saved", emailQueued: false });
     expect(saveInquiry).toHaveBeenCalledOnce();
+    expect(scheduleInquiryEmails).not.toHaveBeenCalled();
+  });
+  it("schedules immediate delivery only after durable email jobs are saved", async () => {
+    vi.mocked(saveInquiry).mockResolvedValue("queued");
+    const response = await POST(request());
+    expect(await response.json()).toEqual({ status: "saved", emailQueued: true });
+    expect(scheduleInquiryEmails).toHaveBeenCalledWith(valid.id);
   });
   it("rejects foreign origins before accessing storage", async () => {
     expect((await POST(request(valid, "https://foreign.example"))).status).toBe(403);

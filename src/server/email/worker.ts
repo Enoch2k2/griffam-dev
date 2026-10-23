@@ -7,12 +7,14 @@ import { sendEmail } from "./provider";
 
 // Resend keeps idempotency keys for 24h. Stop automatic retries after 23h,
 // including abandoned leases, rather than risk a second email after expiry.
-export async function claimEmail(db: Database) {
+export async function claimEmail(db: Database, inquiryId?: string) {
   return db.transaction(async tx => {
-    const [job] = await tx.select().from(emailJob).where(or(
+    const [job] = await tx.select().from(emailJob).where(and(
+      inquiryId ? eq(emailJob.inquiryId, inquiryId) : undefined,
+      or(
       and(eq(emailJob.status, "pending"), lte(emailJob.availableAt, sql`now()`)),
       and(eq(emailJob.status, "processing"), lte(emailJob.leaseUntil, sql`now()`)),
-    )).orderBy(asc(emailJob.availableAt)).limit(1).for("update", { skipLocked: true });
+    ))).orderBy(asc(emailJob.availableAt)).limit(1).for("update", { skipLocked: true });
     if (!job) return null;
     const [clock] = await tx.select({ expired: sql<boolean>`${emailJob.firstAttemptAt} < now() - interval '23 hours'` })
       .from(emailJob).where(eq(emailJob.id, job.id));
@@ -29,11 +31,11 @@ export async function claimEmail(db: Database) {
   });
 }
 
-export async function drainEmail(db: Database, apiKey: string, send = sendEmail) {
+export async function drainEmail(db: Database, apiKey: string, send = sendEmail, inquiryId?: string) {
   const counts = { accepted: 0, pending: 0, failed: 0, review: 0 };
   // Small bounded batches let a scheduler wake a sleeping Render service.
   for (let index = 0; index < 5; index++) {
-    const claim = await claimEmail(db);
+    const claim = await claimEmail(db, inquiryId);
     if (!claim) break;
     if (claim.review) { counts.review++; continue; }
     const { job } = claim;

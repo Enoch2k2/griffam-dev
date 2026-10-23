@@ -1,6 +1,6 @@
 # Sprint 3 — Public website
 
-Status: public-site PR #7 merged; inquiry email implementation added behind a disabled-by-default switch. Provider setup, deployment verification and content follow-ups remain.
+Status: public-site PR #7 merged; inquiry email implementation added behind a disabled-by-default switch. Owner confirmed real email delivery on 2026-10-23; immediate-send enhancement and content follow-ups remain.
 
 ## Delivered
 
@@ -40,7 +40,7 @@ and define retention/deletion policy before accepting real public inquiries.
 
 - Owner review of public copy and project descriptions.
 - Resume PDF from the owner; there is no fake download button. Upload management is Sprint 4.
-- Configure Resend and scheduled execution, then verify real email delivery.
+- Verify immediate sends after deploying the enhancement; real delivery was confirmed by the owner.
 - Verify the new migration and inquiry journey after merge/deployment.
 - Complete outstanding operational recovery checks from Sprint 2 before public launch.
 - Booking, publishing and chess remain explicitly planned, not functioning features.
