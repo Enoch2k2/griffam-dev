@@ -552,3 +552,9 @@ h3 {
 .article-body code { font-family: monospace; font-size: .9em; }
 .article-body blockquote { border-left: 3px solid var(--focus); padding-left: 20px; color: var(--muted); }
 .article-body a { text-decoration: underline; }
+
+.markdown-toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 8px 8px 0 0; background: var(--featured-surface); }
+.markdown-toolbar button { color: var(--foreground); background: transparent; border: 1px solid var(--line); border-radius: 5px; min-width: 44px; min-height: 44px; padding: 6px 12px; cursor: pointer; }
+.markdown-toolbar button:hover { border-color: var(--focus); }
+.post-editor .markdown-input { border-radius: 0 0 8px 8px; min-height: 420px; }
+.article-body .article-heading-major { font-size: 34px; }
