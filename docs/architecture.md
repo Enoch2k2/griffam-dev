@@ -4,8 +4,8 @@
 
 Next.js App Router with server components by default, React, strict TypeScript,
 Tailwind CSS, npm lockfile, and PostgreSQL. Keep a single application initially.
-Neon PostgreSQL is connected. The website is not deployed, Google OAuth credentials
-are pending, and no domain changes have been made.
+Neon PostgreSQL, Render and Google owner OAuth are configured. The canonical
+site URL is https://www.griffamdev.dev. Public launch acceptance remains open.
 
 ## Build ourselves
 
@@ -19,7 +19,7 @@ Use Better Auth for owner Google sign-in and database-backed sessions; Drizzle O
 and node-postgres for queries and versioned SQL migrations.
 Use Google Calendar API for free/busy and events, a chess rules library and engine
 for legal moves, a language model for conversation, an email provider for delivery,
-and a payment processor for payments. Calendar, email, AI and payment providers/SDKs remain future work.
+and a payment processor for payments. Inquiry email uses a Resend adapter and PostgreSQL outbox; live configuration is pending. Calendar, AI and payments remain future work.
 
 ## Feature boundaries to add as implementation begins
 
