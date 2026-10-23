@@ -48,6 +48,8 @@ export default defineConfig({
         "src/app/api/**/*.ts",
         "src/server/auth/**/*.ts",
         "src/features/auth/auth-button.tsx",
+        "src/features/inquiries/**/*.ts*",
+        "src/server/inquiries/**/*.ts",
       ],
       exclude: ["**/*.test.*"],
     },
