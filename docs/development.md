@@ -72,6 +72,7 @@ superseded runs for the same branch/PR are cancelled.
 Render Free (Next.js web service) and Neon Free (PostgreSQL) are selected for
 development. Neon and Render are connected. Recheck Render auto-deploy after rollback
 exercises, because rollback can disable it. Isolated PR previews are still pending.
+The owner confirmed on 2026-10-23 that Render auto-deploy waits for CI to pass.
 Flow: PR -> checks -> review -> merge -> main checks -> Render deployment.
 Production deployment should only occur from main after checks pass, with scoped
 secrets and appropriate environment approvals. Do not run untrusted PR code with

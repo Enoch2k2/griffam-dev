@@ -9,9 +9,22 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
+import type { Article } from "@/features/content/validation";
 import type { EmailPayload } from "../email/templates";
 
 const date = (name: string) => timestamp(name, { withTimezone: true });
+
+export const post = pgTable("post", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
+  body: text("body").notNull(),
+  version: integer("version").notNull().default(1),
+  published: jsonb("published").$type<Article>(),
+  publishedAt: date("published_at"),
+  updatedAt: date("updated_at").notNull().defaultNow(),
+}, table => [index("post_published_idx").on(table.publishedAt)]);
 
 export const inquiry = pgTable(
   "inquiry",
