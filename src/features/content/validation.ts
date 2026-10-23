@@ -1,3 +1,5 @@
+export const TITLE_MIN = 3;
+export const TITLE_MAX = 120;
 export type Article = { title: string; summary: string; body: string };
 export type Draft = Article & { id: string; slug: string; version: number; published: boolean };
 export type PostInput = Omit<Draft, "published"> & { action: "save" | "publish" | "unpublish" };
@@ -8,7 +10,7 @@ export function validatePost(value: unknown): PostInput | null {
   if (typeof v.version !== "number" || !Number.isSafeInteger(v.version) || v.version < 0 || v.version > 1_000_000) return null;
   if (v.action !== "save" && v.action !== "publish" && v.action !== "unpublish") return null;
   if (typeof v.slug !== "string" || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(v.slug) || v.slug.length > 100 || v.slug.length < 3) return null;
-  if (typeof v.title !== "string" || v.title.trim().length < 3 || v.title.length > 160 ||
+  if (typeof v.title !== "string" || v.title.trim().length < TITLE_MIN || v.title.length > TITLE_MAX ||
       typeof v.summary !== "string" || v.summary.length > 300 ||
       typeof v.body !== "string" || v.body.length > 40_000) return null;
   if (v.action === "publish" && (v.body.trim().length < 20 || v.summary.trim().length < 10)) return null;

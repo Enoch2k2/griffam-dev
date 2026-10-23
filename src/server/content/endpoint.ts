@@ -28,7 +28,7 @@ export async function savePostRequest(request: Request) {
     try { value = JSON.parse(Buffer.concat(chunks).toString("utf8")); }
     catch { return reply({ error: "Invalid JSON." }, 400); }
     const input = validatePost(value);
-    if (!input) return reply({ error: "Check title (3–160), slug (3–100 lowercase letters/numbers/hyphens), summary (up to 300) and body (up to 40,000). Publishing also needs a summary of at least 10 characters and a body of at least 20." }, 400);
+    if (!input) return reply({ error: "Check title (3–120), slug (3–100 lowercase letters/numbers/hyphens), summary (up to 300) and body (up to 40,000). Publishing also needs a summary of at least 10 characters and a body of at least 20." }, 400);
     const result = await writePost(getDatabase(), input);
     if (result.status === "conflict") return reply({ error: "This article changed in another tab, or a previous save completed. Your text is still here. Copy it before reloading the article from the list." }, 409);
     if (result.status === "slug_locked") return reply({ error: "Unpublish before changing a live article URL." }, 409);

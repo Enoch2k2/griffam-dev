@@ -1,16 +1,17 @@
 # Sprint 4 — Publishing
 
-Status: first slice implemented on `codex/blog-publishing`; merge and deployment pending.
+Status: the first publishing slice is merged. Editor usability improvements are on `codex/blog-editor-controls`; merge and deployment pending.
 Media and resume management are the next slice, not delivered by this change.
 
 ## Owner workflow
 
 1. Sign in and open `/admin/posts` (also linked from the admin dashboard).
-2. Create an article with a title, URL slug, short summary and Markdown body.
-3. Save a draft and use Preview to inspect it. Neither action publishes it.
-4. Publish when ready. The article appears at `/learn/blog/<slug>` and in the blog list.
-5. Save further edits privately; Publish changes explicitly replaces the live snapshot.
-6. Unpublish removes public access while retaining the editable draft.
+2. Add a 3–120 character title. A new article slug follows the title until you customize it or save. Use Generate from title to regenerate an unpublished URL. Titles with no usable Latin letters/numbers need a manually entered slug. Duplicate URLs return a conflict so you can choose another.
+3. Add a short summary and write in the single Markdown body box. Select text and use H1/H2/H3, bold, italic, quote, list, code or link buttons, or type Markdown directly. Replace the example link URL before publishing. H1 Markdown renders as a prominent section heading beneath the article title.
+4. Save a draft and use Preview to inspect it. Neither action publishes it.
+5. Publish when ready. The article appears at `/learn/blog/<slug>` and in the blog list.
+6. Save further edits privately; Publish changes explicitly replaces the live snapshot.
+7. Unpublish removes public access while retaining the editable draft.
 
 Save before leaving; there is no autosave. A browser close/reload warning helps with
 unsaved edits, but internal navigation is not blocked. A saved permalink reopens the
@@ -52,3 +53,17 @@ after unpublishing does not create a redirect from the old URL.
 - Resume PDF supplied by the owner, upload validation and replacement workflow.
 - Article-specific SEO metadata, images/video support and responsive acceptance.
 - Review search indexing at launch; the existing noindex policy remains.
+
+## Editor usability follow-up
+
+Inspired by [Medium’s selection-based formatting](https://help.medium.com/hc/en-us/articles/215194537-Using-the-story-editor), with a visible wrapping toolbar and one Markdown body input. This is still the publishing sprint; it does not add a rich-text storage format or a new CMS dependency. Existing saved URLs do not change when a title changes. Title constraints are shared between browser and API. Existing titles longer than 120 characters must be shortened before saving again.
+
+Validation for the editor follow-up: lint, typecheck, 116 tests across 20 files,
+and production build passed. Browser verified automatic slugs, heading insertion,
+selection retention and the dark toolbar in a local production build.
+
+Testing setup note: an initial migration invocation set DATABASE_URL locally but
+left the configured DATABASE_URL_UNPOOLED in effect, so it ran against the configured
+Neon connection. This change introduces no migrations. Both variables were then set
+to the disposable local database before the browser fixture was created. Always set
+both variables when using the migration CLI for local verification.
