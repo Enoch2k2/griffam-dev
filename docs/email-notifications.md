@@ -74,6 +74,11 @@ per-email/global limits, but does not prove ownership of a visitor address.
 - Pause by setting `EMAIL_ENABLED=false` in Render and disabling the workflow variable.
   Existing jobs remain stored. Re-enable only after checking old uncertain jobs.
 
+The private inbox includes a linked GitHub workflow badge above the messages. It reflects
+the latest workflow result, can be cached by GitHub, and does not prove email delivery.
+If a run fails with a missing worker secret, create it as a repository Actions **secret**
+(not a variable or an environment-only secret), then re-run the failed job.
+
 The private inbox shows job status, attempt count and sanitized error code; it never
 renders payloads or secrets. Runtime logs do not include visitor addresses/messages.
 Review data retention for both inquiries and outbox payloads before public launch.

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { EmailWorkflowStatus } from "@/features/inquiries/email-workflow-status";
 import { readInbox } from "@/server/inquiries/inbox";
 export const metadata = { title: "Project inquiries" };
 type Props = { searchParams: Promise<{ page?: string }> };
@@ -21,6 +22,7 @@ async function Inbox({ searchParams }: Props) {
   if (inbox.status === "denied") redirect("/admin/sign-in");
   if (inbox.status === "unavailable") return <p role="alert">The inbox is temporarily unavailable. Please reload to try again.</p>;
   return <>
+    <EmailWorkflowStatus />
     {inbox.rows.length === 0 ? <p className="inquiry-feedback">No inquiries on this page.</p> : <div className="inbox-list">
       {inbox.rows.map(item => <article className="inbox-item" key={item.id}>
         <p className="eyebrow">{item.service}</p>

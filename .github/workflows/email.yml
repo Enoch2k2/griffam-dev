@@ -20,8 +20,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "$EMAIL_WORKER_URL" != https://*/api/internal/email || ${#EMAIL_WORKER_SECRET} -lt 32 ]]; then
-            echo "Configure the HTTPS worker URL and worker secret."
+          if [[ "$EMAIL_WORKER_URL" != https://*/api/internal/email ]]; then
+            echo "::error::Set the EMAIL_WORKER_URL repository variable to the HTTPS /api/internal/email endpoint."
+            exit 1
+          fi
+          if [[ ${#EMAIL_WORKER_SECRET} -lt 32 ]]; then
+            echo "::error::Add EMAIL_WORKER_SECRET under repository Settings > Secrets and variables > Actions > Secrets. Use the same value as Render (at least 32 characters), not a repository variable."
             exit 1
           fi
           curl --silent --show-error --fail --max-time 180 \
