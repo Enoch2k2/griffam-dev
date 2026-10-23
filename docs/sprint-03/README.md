@@ -1,6 +1,6 @@
 # Sprint 3 — Public website
 
-Status: implementation ready for review; content and launch follow-ups remain.
+Status: public-site PR #7 merged; inquiry email implementation added behind a disabled-by-default switch. Provider setup, deployment verification and content follow-ups remain.
 
 ## Delivered
 
@@ -26,10 +26,11 @@ Run `npm run db:migrate` before starting the new build (existing Render start co
 already does this). No production migration is applied by local tests. The inquiry
 endpoint requires DATABASE_URL and the correct BETTER_AUTH_URL origin.
 
-The inbox is the initial delivery channel. **No inquiry email notification or confirmation
-is sent.** The form and inbox state this explicitly. Enoch must check the admin inbox;
-email provider selection and delivery/retry work remain open. Booking confirmations
-remain part of the planned booking/notifications work.
+The inbox remains the source of truth. Optional Resend owner notifications and visitor
+receipts now use a transactional database outbox and an authenticated scheduled worker.
+Delivery stays disabled until credentials, sender DNS and the scheduler are configured.
+See [email setup and recovery](../email-notifications.md). Booking confirmations remain
+part of the planned booking/notifications work.
 
 The honeypot and rate limits are basic spam controls, not bot identity verification.
 A malicious sender can exhaust the global hourly allowance. Reassess abuse controls
@@ -39,7 +40,7 @@ and define retention/deletion policy before accepting real public inquiries.
 
 - Owner review of public copy and project descriptions.
 - Resume PDF from the owner; there is no fake download button. Upload management is Sprint 4.
-- Email notification integration or explicit agreement to defer it.
+- Configure Resend and scheduled execution, then verify real email delivery.
 - Verify the new migration and inquiry journey after merge/deployment.
 - Complete outstanding operational recovery checks from Sprint 2 before public launch.
 - Booking, publishing and chess remain explicitly planned, not functioning features.

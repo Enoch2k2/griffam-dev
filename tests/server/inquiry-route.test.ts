@@ -16,7 +16,7 @@ describe("public inquiry endpoint", () => {
     const response = await POST(request());
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
-    expect(await response.json()).toEqual({ status: "saved" });
+    expect(await response.json()).toEqual({ status: "saved", emailQueued: false });
     expect(saveInquiry).toHaveBeenCalledOnce();
   });
   it("rejects foreign origins before accessing storage", async () => {

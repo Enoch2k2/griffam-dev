@@ -32,6 +32,12 @@ describe("inquiry form", () => {
     expect(first.id).toBe(second.id);
     expect(screen.getByRole("status")).toHaveTextContent("No appointment has been booked");
   });
+  it("distinguishes a queued receipt from completed delivery", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ status: "saved", emailQueued: true }) }));
+    render(<InquiryForm />); fill();
+    await userEvent.click(screen.getByRole("button", { name: "Send project inquiry" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("A receipt email is queued");
+  });
   it("disables submission while saving and displays server errors", async () => {
     let resolve!: (value: unknown) => void;
     vi.stubGlobal("fetch", vi.fn(() => new Promise(r => { resolve = r; })));
