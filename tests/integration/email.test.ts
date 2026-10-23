@@ -74,6 +74,20 @@ describe.skipIf(!testURL)("transactional inquiry outbox", () => {
     await drainEmail(database.db, "key", send);
     for (const call of send.mock.calls.slice(2)) expect(first).toContainEqual([call[0], call[1]]);
   });
+  it("immediate attempts process only the submitted inquiry and honor retry delays", async () => {
+    const older = input();
+    const fresh = input();
+    await saveInquiry(database.db, older, config);
+    await saveInquiry(database.db, fresh, config);
+    const send = vi.fn().mockResolvedValue({ status: "retry", error: "provider_unreachable" });
+    await drainEmail(database.db, "key", send, fresh.id);
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(send.mock.calls.every(call => call[1].endsWith(fresh.id))).toBe(true);
+    await drainEmail(database.db, "key", send, fresh.id);
+    expect(send).toHaveBeenCalledTimes(2);
+    const oldJobs = await database.db.select().from(emailJob).where(eq(emailJob.inquiryId, older.id));
+    expect(oldJobs.every(job => job.attempts === 0)).toBe(true);
+  });
   it("stops uncertain sends outside the provider deduplication window", async () => {
     await saveInquiry(database.db, input(), config);
     await database.db.update(emailJob).set({ firstAttemptAt: new Date(Date.now() - 24 * 3600000), attempts: 1 });

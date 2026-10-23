@@ -1,6 +1,7 @@
 import "server-only";
 import { validateInquiry } from "@/features/inquiries/validation";
 import { getDatabase } from "@/server/db";
+import { scheduleInquiryEmails } from "@/server/email/immediate";
 import { saveInquiry } from "./store";
 
 const maxBytes = 24_000;
@@ -40,6 +41,7 @@ export async function submitInquiry(request: Request) {
     const result = await saveInquiry(getDatabase(), validated.data);
     if (result === "limited") return Response.json({ error: "Too many inquiries have been submitted. Please try again in an hour or use LinkedIn below." }, { status: 429, headers: { ...headers, "Retry-After": "3600" } });
     if (result === "conflict") return reply("This submission reference was already used for a different message. Refresh before sending a new inquiry.", 409);
+    if (result === "queued") scheduleInquiryEmails(validated.data.id);
     return Response.json({ status: "saved", emailQueued: result === "queued" }, { headers });
   } catch {
     // Never log inquiry contents, email addresses, credentials, or raw DB errors.

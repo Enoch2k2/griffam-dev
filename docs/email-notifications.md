@@ -1,7 +1,8 @@
 # Inquiry email notifications
 
-Status: implemented behind an explicit enable switch. Real delivery requires Resend
-and scheduler setup. No existing Google/Gmail configuration is replaced.
+Status: owner confirmed real email delivery on 2026-10-23. New inquiries now schedule
+an immediate attempt after the form response; the durable worker remains the recovery
+path. Keep the enable switch and scheduler configured. No Google/Gmail configuration is replaced.
 
 ## Setup after the PR is merged and deployed
 
@@ -29,10 +30,16 @@ and scheduler setup. No existing Google/Gmail configuration is replaced.
    Confirm both emails arrive, the reply addresses are correct, and the inbox shows
    both jobs accepted. Repeat the workflow to verify no duplicate send.
 
-The workflow runs at minutes 7, 22, 37 and 52 each hour, on main only. It makes one
+After a successful inquiry transaction, Next.js `after` attempts its two emails without
+blocking the saved response. It processes only that inquiry and uses the same lease,
+idempotency and retry rules as the scheduled worker. Repeated form submissions cannot
+bypass backoff or resend accepted jobs. This best-effort attempt is not a promise of
+instant delivery: Render restarts, API errors and recipient mail processing can delay it.
+
+The recovery workflow runs at minutes 7, 22, 37 and 52 each hour, on main only. It makes one
 authenticated POST; it has no database/API-key access and checks out no code.
-It processes at most five emails per run (two per inquiry). Increase capacity or choose
-a dedicated runner before traffic exceeds this low-volume setup.
+Each scheduled run processes at most five pending emails. Increase recovery capacity
+or choose a dedicated runner before traffic exceeds this low-volume setup.
 
 GitHub schedules may be delayed or dropped under load, and public-repository schedules
 can disable after 60 days without repository activity. Check Actions and the private inbox
@@ -99,3 +106,10 @@ worker request, processed both jobs using a mock provider, and did not resend on
 repeated submission/worker calls. No real emails were sent during these tests.
 Resend DNS, live API delivery, actual recipient inboxes and scheduled execution still
 require the setup and post-deployment checks above.
+
+Immediate-send enhancement (2026-10-23): all 90 tests and production build passed.
+A production-server HTTP smoke test with isolated PostgreSQL and a deliberately slow
+mock provider returned saved before delivery completed, then accepted both jobs
+without a scheduled call. Repeated submission did not resend. Live deployment of
+this enhancement still needs verification; the owner's real-delivery confirmation
+above refers to the previously deployed scheduled-worker version.
