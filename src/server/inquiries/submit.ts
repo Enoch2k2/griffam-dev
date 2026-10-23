@@ -40,7 +40,7 @@ export async function submitInquiry(request: Request) {
     const result = await saveInquiry(getDatabase(), validated.data);
     if (result === "limited") return Response.json({ error: "Too many inquiries have been submitted. Please try again in an hour or use LinkedIn below." }, { status: 429, headers: { ...headers, "Retry-After": "3600" } });
     if (result === "conflict") return reply("This submission reference was already used for a different message. Refresh before sending a new inquiry.", 409);
-    return Response.json({ status: "saved" }, { headers });
+    return Response.json({ status: "saved", emailQueued: result === "queued" }, { headers });
   } catch {
     // Never log inquiry contents, email addresses, credentials, or raw DB errors.
     console.error("Inquiry persistence failed.");

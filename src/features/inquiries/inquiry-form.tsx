@@ -5,6 +5,7 @@ import { inquiryServices, validateInquiry, type InquiryErrors } from "./validati
 
 export function InquiryForm() {
   const [pending, setPending] = useState(false);
+  const [emailQueued, setEmailQueued] = useState(false);
   const [saved, setSaved] = useState(false);
   const [notice, setNotice] = useState("");
   const [errors, setErrors] = useState<InquiryErrors>({});
@@ -37,6 +38,7 @@ export function InquiryForm() {
         setNotice(result.error || "Your inquiry could not be sent. Please try again.");
         setErrors(result.errors || {});
       } else if (result.status === "saved") {
+        setEmailQueued(result.emailQueued === true);
         setSaved(true);
       } else {
         setNotice("We couldn't confirm your inquiry was saved. Please try again.");
@@ -49,7 +51,7 @@ export function InquiryForm() {
     <div className="inquiry-feedback" ref={feedback} tabIndex={-1} role="status">
       <h2>Your inquiry is saved.</h2>
       <p>Enoch can review it in his private inbox and reply using the email address you provided.</p>
-      <p>No appointment has been booked, and no confirmation email is sent yet.</p>
+      <p>No appointment has been booked. {emailQueued ? "A receipt email is queued for the address you provided. Delivery may take a little while." : "Email receipts are not enabled for this submission."}</p>
     </div>
   );
   return (

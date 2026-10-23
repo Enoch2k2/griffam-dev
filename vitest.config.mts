@@ -50,6 +50,7 @@ export default defineConfig({
         "src/features/auth/auth-button.tsx",
         "src/features/inquiries/**/*.ts*",
         "src/server/inquiries/**/*.ts",
+        "src/server/email/**/*.ts",
       ],
       exclude: ["**/*.test.*"],
     },

@@ -15,6 +15,13 @@
       "when": 1792415269045,
       "tag": "0001_careful_ultimatum",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792725708290,
+      "tag": "0002_perfect_thaddeus_ross",
+      "breakpoints": true
     }
   ]
 }

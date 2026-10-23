@@ -1,11 +1,15 @@
 import {
   boolean,
+  integer,
+  jsonb,
   index,
   pgTable,
   text,
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+
+import type { EmailPayload } from "../email/templates";
 
 const date = (name: string) => timestamp(name, { withTimezone: true });
 
@@ -25,6 +29,25 @@ export const inquiry = pgTable(
     index("inquiry_email_created_idx").on(table.email, table.createdAt),
   ],
 );
+
+export const emailJob = pgTable("email_job", {
+  id: text("id").primaryKey(),
+  inquiryId: text("inquiry_id").notNull().references(() => inquiry.id, { onDelete: "cascade" }),
+  kind: text("kind").notNull(),
+  payload: jsonb("payload").$type<EmailPayload>().notNull(),
+  status: text("status").notNull().default("pending"),
+  attempts: integer("attempts").notNull().default(0),
+  availableAt: date("available_at").notNull().defaultNow(),
+  firstAttemptAt: date("first_attempt_at"),
+  leaseUntil: date("lease_until"),
+  leaseToken: text("lease_token"),
+  providerId: text("provider_id"),
+  lastError: text("last_error"),
+  createdAt: date("created_at").notNull().defaultNow(),
+}, table => [
+  index("email_job_due_idx").on(table.status, table.availableAt),
+  index("email_job_inquiry_idx").on(table.inquiryId),
+]);
 
 export const user = pgTable("auth_user", {
   id: text("id").primaryKey(),
