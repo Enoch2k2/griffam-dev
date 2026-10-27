@@ -52,6 +52,8 @@ export default defineConfig({
         "src/server/inquiries/**/*.ts",
         "src/server/email/**/*.ts",
         "src/server/content/**/*.ts",
+        "src/server/resume/**/*.ts",
+        "src/features/resume/**/*.tsx",
         "src/features/content/**/*.ts*",
       ],
       exclude: ["**/*.test.*"],

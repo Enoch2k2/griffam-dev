@@ -1,7 +1,10 @@
 # Sprint 4 — Publishing
 
-Status: the first publishing slice is merged. Editor usability improvements are on `codex/blog-editor-controls`; merge and deployment pending.
-Media and resume management are the next slice, not delivered by this change.
+Status: publishing, editor improvements and the illustrated sample are merged.
+Resume upload/download management is implemented on `codex/resume-management`;
+merge, Render storage credentials and the actual resume PDF remain. The private
+production bucket is provisioned.
+Blog image uploads are the next slice.
 
 ## Owner workflow
 
@@ -85,3 +88,9 @@ Verification (2026-10-26): `npm run check` passed lint, types, 119 tests across
 21 files and the production build. Integration tests used disposable local
 PostgreSQL. Browser preview confirmed both images and captions; Save draft
 succeeded locally. No production draft or publication was created.
+
+## Resume management
+
+Owner-only PDF upload and replacement, durable private storage, and the public
+resume download are implemented. See [setup and behavior](../resume-storage.md).
+General blog image uploads and a resume history UI are not part of this slice.
