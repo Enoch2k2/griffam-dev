@@ -18,14 +18,18 @@ This skeleton is an initial foundation, not completion of Sprint 1 or Sprint 2.
 
 ## Current sprint
 
-Sprint 4 is underway: see the [publishing checklist](sprint-04/README.md).
+Sprint 5 is underway: see the [booking checklist](sprint-05/README.md).
+Resume management is merged and confirmed working by the owner. Blog image uploads,
+article SEO and remaining publishing polish are carried forward in the
+[publishing checklist](sprint-04/README.md).
 Sprint 3 public pages and inquiry emails are merged; the owner confirmed instant email
-delivery on 2026-10-23. Remaining content review and the resume carry forward.
+delivery on 2026-10-23. Remaining content review carries forward.
 See the [public website checklist](sprint-03/README.md).
 Sprint 2 implementation is deployed; remaining operational checks are tracked in the
 [foundation checklist](sprint-02/README.md).
 Sprint 1 layout direction, audience and core booking preferences are accepted.
-Actual availability and remaining booking policies stay open for the booking sprint.
+Weekday hours, Central time and after-call buffers are confirmed; remaining booking
+policies are listed in Sprint 5.
 
 ## Launch acceptance
 

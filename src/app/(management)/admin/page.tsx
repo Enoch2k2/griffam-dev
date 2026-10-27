@@ -39,6 +39,7 @@ async function AdminContent() {
             <Link className="button" href="/admin/inquiries">Project inquiries</Link>
             <Link className="button" href="/admin/posts">Manage articles</Link>
             <Link className="button" href="/admin/resume">Manage resume</Link>
+            <Link className="button" href="/admin/availability">Availability</Link>
             <AuthButton action="sign-out" />
             <Link href="/">View website</Link>
           </div>
