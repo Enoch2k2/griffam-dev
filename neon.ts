@@ -3,6 +3,8 @@ import { defineConfig } from "@neon/config/v1";
 export default defineConfig({
   // PostgreSQL only. Keep owner sign-in in our existing Better Auth application.
   auth: false,
+  // Private documents; the app serves only the current public resume.
+  buckets: { "griffamdev-documents": {} },
   // Branch policy: per-branch tuning
   branch: (branch) => {
     if (branch.isDefault) {
