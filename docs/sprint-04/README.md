@@ -26,7 +26,7 @@ after unpublishing does not create a redirect from the old URL.
 - Separate draft fields and published snapshot; public queries never select draft text.
 - Owner authorization before reads/writes, exact-origin checks, bounded request bodies,
   version checks and unique slugs. Public and owner lists paginate at 20 articles.
-- Raw HTML, embedded media and images are disabled. No MDX execution or shared draft URLs.
+- Bundled images under `/images/blog/` render with alt text and optional captions. External images, raw HTML and embedded media are disabled. No MDX execution or shared draft URLs.
 - No new environment variables. The additive `0003` migration creates the post table;
   the existing Render startup migration command applies it after merge/deployment.
 - No example articles or test users are inserted into production.
@@ -67,3 +67,21 @@ left the configured DATABASE_URL_UNPOOLED in effect, so it ran against the confi
 Neon connection. This change introduces no migrations. Both variables were then set
 to the disposable local database before the browser fixture was created. Always set
 both variables when using the migration CLI for local verification.
+
+## Illustrated sample article
+
+Open `/admin/posts/example` as the owner, or follow the sample link on New article.
+The sample contains an original article about GriffamDev and two bundled SVG
+illustrations. It is an unsaved starting point: preview, edit, then Save draft.
+It does not seed production, replace an existing article or publish automatically.
+
+Use `![Accessible description](/images/blog/filename.svg "Optional caption")`.
+Only simple filenames in the bundled blog directory are rendered (SVG, PNG, JPG,
+WebP); remote URLs and traversal paths are rejected. General image uploads remain
+a later slice. The original SVG illustrations are versioned with the site and
+require no storage account or image subscription.
+
+Verification (2026-10-26): `npm run check` passed lint, types, 119 tests across
+21 files and the production build. Integration tests used disposable local
+PostgreSQL. Browser preview confirmed both images and captions; Save draft
+succeeded locally. No production draft or publication was created.
