@@ -558,3 +558,7 @@ h3 {
 .markdown-toolbar button:hover { border-color: var(--focus); }
 .post-editor .markdown-input { border-radius: 0 0 8px 8px; min-height: 420px; }
 .article-body .article-heading-major { font-size: 34px; }
+
+.article-image { display: block; margin: 32px 0; }
+.article-image img { width: 100%; height: auto; border-radius: 16px; border: 1px solid var(--line); }
+.article-caption { display: block; text-align: center; font-size: 14px; line-height: 1.6; color: var(--muted); margin-top: 12px; }

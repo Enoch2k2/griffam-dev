@@ -74,3 +74,12 @@ it("rejects too-short and overlong titles without saving", async () => {
   await userEvent.click(screen.getByRole("button", { name: "Save draft" }));
   expect(fetch).not.toHaveBeenCalled();
 });
+it("renders bundled article images with accessible descriptions and captions", () => {
+  render(<ArticleBody body={'![The publishing workflow](/images/blog/draft-to-published.svg "Draft, preview, publish.")'} />);
+  expect(screen.getByRole("img", { name: "The publishing workflow" })).toHaveAttribute("src", "/images/blog/draft-to-published.svg");
+  expect(screen.getByText("Draft, preview, publish.")).toBeInTheDocument();
+});
+it("rejects image paths outside the bundled blog directory", () => {
+  const { container } = render(<ArticleBody body={'![remote](https://example.com/x.png)\n\n![other](/api/private.png)\n\n![traversal](/images/blog/../secret.png)'} />);
+  expect(container.querySelector("img")).toBeNull();
+});

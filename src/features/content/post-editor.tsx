@@ -11,7 +11,7 @@ export function PostEditor({ initial = blank }: { initial?: Draft }) {
   const [draft, setDraft] = useState(initial);
   const [autoSlug, setAutoSlug] = useState(!initial.id && !initial.slug);
   const bodyInput = useRef<HTMLTextAreaElement>(null);
-  const [dirty, setDirty] = useState(false);
+  const [dirty, setDirty] = useState(!initial.id && Boolean(initial.body));
   const [pending, setPending] = useState(false);
   const [preview, setPreview] = useState(false);
   const [notice, setNotice] = useState("");
@@ -79,7 +79,7 @@ export function PostEditor({ initial = blank }: { initial?: Draft }) {
         <button type="button" className="button secondary" aria-pressed={preview} onClick={() => setPreview(!preview)}>{preview ? "Back to writing" : "Preview article"}</button>
       </div>
       {preview ? <section className="post-preview" aria-label="Article preview"><h2>{draft.title || "Untitled article"}</h2><p className="lead">{draft.summary}</p><ArticleBody body={draft.body} /></section> :
-        <div className="form-field"><label htmlFor="post-body">Article (Markdown)</label><p className="form-help" id="markdown-help">Write Markdown directly, or select text and use the formatting buttons. Raw HTML, images and embeds are disabled in this first version.</p><div className="markdown-toolbar" role="group" aria-label="Markdown formatting">{formats.map(([formatId, label, name]) => <button key={formatId} type="button" aria-label={name} title={name} onMouseDown={event => event.preventDefault()} onClick={() => format(formatId)}>{label}</button>)}</div><textarea ref={bodyInput} className="markdown-input" id="post-body" rows={18} maxLength={40000} aria-describedby="markdown-help" value={draft.body} onChange={event => edit("body", event.target.value)} /></div>}
+        <div className="form-field"><label htmlFor="post-body">Article (Markdown)</label><p className="form-help" id="markdown-help">Write Markdown directly, or select text and use the formatting buttons. Bundled images use ![description](/images/blog/filename.svg). Raw HTML and embeds are disabled.</p><div className="markdown-toolbar" role="group" aria-label="Markdown formatting">{formats.map(([formatId, label, name]) => <button key={formatId} type="button" aria-label={name} title={name} onMouseDown={event => event.preventDefault()} onClick={() => format(formatId)}>{label}</button>)}</div><textarea ref={bodyInput} className="markdown-input" id="post-body" rows={18} maxLength={40000} aria-describedby="markdown-help" value={draft.body} onChange={event => edit("body", event.target.value)} /></div>}
       <div className="actions">
         <button type="button" className="button secondary" onClick={() => save("save")}>{pending ? "Saving…" : "Save draft"}</button>
         <button type="button" className="button" onClick={() => save("publish")}>{draft.published ? "Publish changes" : "Publish article"}</button>

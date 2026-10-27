@@ -11,6 +11,6 @@ export default function Page() {
 async function NewArticle() {
   if ((await getAdminAccess(await headers())).status !== "authorized") redirect("/admin/sign-in");
   return <div className="shell"><main id="main"><section className="page-section">
-    <Link href="/admin/posts">← Articles</Link><p className="eyebrow">Owner publishing</p><h1>Write something useful.</h1><PostEditor />
+    <Link href="/admin/posts">← Articles</Link><p className="eyebrow">Owner publishing</p><h1>Write something useful.</h1><p className="form-help"><Link href="/admin/posts/example">Try the illustrated GriffamDev sample article →</Link></p><PostEditor />
   </section></main></div>;
 }
