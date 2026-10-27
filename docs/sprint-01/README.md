@@ -36,15 +36,16 @@ This sprint produces specifications, not working booking, AI, or account feature
 - Describe the call as discussing project needs and fit; paid consulting is not an established offering.
 - Render Free for the Next.js app/backend and Neon Free for PostgreSQL during development.
 
-Buffer placement (before, after, or both) still needs definition before implementation.
-Keep availability configurable and booking disabled until actual hours/time zone are set.
+Confirmed 2026-10-27: Monday–Friday 9 AM–4 PM, America/Chicago, with a 30-minute
+buffer after each call. Keep availability configurable and public booking disabled
+until Calendar integration and reservation handling are verified.
 
 ## Remaining proposed defaults — not yet business commitments
 
 | Decision | Proposed starting point | Status |
 | --- | --- | --- |
 | Booking horizon | Next 30 days | Awaiting Enoch |
-| Time zone and weekly hours | Owner supplies IANA time zone and actual availability | Awaiting Enoch |
+| Time zone and weekly hours | America/Chicago; Monday–Friday 9 AM–4 PM | Confirmed 2026-10-27 |
 | Reminders | 24 hours and 1 hour before; skip times already passed | Awaiting Enoch |
 | Cancellation/rescheduling | Self-service until 24 hours before; contact owner afterward | Awaiting Enoch |
 | Chess | Guest play, three difficulty presets, optional coaching | Proposed launch scope |

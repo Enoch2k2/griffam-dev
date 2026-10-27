@@ -1,10 +1,9 @@
 # Sprint 4 — Publishing
 
 Status: publishing, editor improvements and the illustrated sample are merged.
-Resume upload/download management is implemented on `codex/resume-management`;
-merge, Render storage credentials and the actual resume PDF remain. The private
-production bucket is provisioned.
-Blog image uploads are the next slice.
+Resume upload/download management is merged and the owner confirmed it works on
+2026-10-27. The owner requested moving to Sprint 5. Blog image uploads and remaining
+publishing polish carry forward; this is not full Sprint 4 completion.
 
 ## Owner workflow
 
