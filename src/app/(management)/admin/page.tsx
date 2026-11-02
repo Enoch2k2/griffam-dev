@@ -40,6 +40,7 @@ async function AdminContent() {
             <Link className="button" href="/admin/posts">Manage articles</Link>
             <Link className="button" href="/admin/resume">Manage resume</Link>
             <Link className="button" href="/admin/availability">Availability</Link>
+            <Link className="button" href="/admin/calendar">Google Calendar</Link>
             <AuthButton action="sign-out" />
             <Link href="/">View website</Link>
           </div>

@@ -1,8 +1,10 @@
 # Sprint 5 — Custom booking
 
-Status: started. The first slice adds owner availability settings and a schedule
-preview. It does not expose bookable slots, connect Google Calendar, or create
-appointments. The public booking page remains a planned-feature page.
+Status: owner availability merged. The next slice adds owner Google Calendar consent,
+encrypted credential storage, disconnect/reconnect and a seven-day free/busy access
+test. It requires provider configuration and owner consent before live validation.
+The public booking page remains a planned-feature page; no appointments are created.
+See [Google Calendar setup](../google-calendar.md).
 
 ## Confirmed by Enoch (2026-10-27)
 
@@ -40,8 +42,8 @@ Google request must never be represented by an empty busy list in the public flo
 
 ## Remaining booking slices
 
-1. Owner Google Calendar connection with encrypted tokens, disconnect/reconnect,
-   scoped consent and free/busy checks. Existing Google sign-in does not grant this.
+1. Complete real-provider validation of the owner Calendar connection after setup.
+   Existing Google sign-in does not grant calendar access; use `/admin/calendar`.
 2. Visitor calendar, timezone display, details/review flow and transactional slot
    reservations. Recheck external conflicts; never claim atomicity across Google
    Calendar and PostgreSQL. Add idempotent event creation and recovery/reconciliation.

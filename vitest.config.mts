@@ -53,6 +53,7 @@ export default defineConfig({
         "src/server/email/**/*.ts",
         "src/server/content/**/*.ts",
         "src/server/booking/**/*.ts",
+        "src/server/calendar/**/*.ts",
         "src/features/booking/**/*.ts*",
         "src/server/resume/**/*.ts",
         "src/features/resume/**/*.tsx",
