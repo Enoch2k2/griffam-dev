@@ -562,3 +562,10 @@ h3 {
 .article-image { display: block; margin: 32px 0; }
 .article-image img { width: 100%; height: auto; border-radius: 16px; border: 1px solid var(--line); }
 .article-caption { display: block; text-align: center; font-size: 14px; line-height: 1.6; color: var(--muted); margin-top: 12px; }
+
+.availability-day { padding: 16px; margin: 16px 0; border: 1px solid var(--line); border-radius: 8px; }
+.availability-day legend { font-weight: 700; padding: 0 8px; }
+.availability-day input[type="time"] { display: block; padding: 10px; background: var(--background); color: var(--foreground); border: 1px solid var(--line); border-radius: 6px; }
+.availability-day input[type="checkbox"] { width: 18px; height: 18px; margin-right: 8px; }
+.post-preview details { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.post-preview summary { cursor: pointer; }

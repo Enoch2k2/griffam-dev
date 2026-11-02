@@ -9,6 +9,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
+import type { Availability } from "@/features/booking/availability";
 import type { Article } from "@/features/content/validation";
 import type { EmailPayload } from "../email/templates";
 
@@ -129,3 +130,10 @@ export const verification = pgTable(
   },
   (table) => [index("auth_verification_identifier_idx").on(table.identifier)],
 );
+
+export const bookingAvailability = pgTable("booking_availability", {
+  id: text("id").primaryKey(),
+  settings: jsonb("settings").$type<Availability>().notNull(),
+  version: integer("version").notNull(),
+  updatedAt: date("updated_at").notNull().defaultNow(),
+});
