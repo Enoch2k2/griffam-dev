@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminAccess } from "@/server/auth/access";
 import { getDatabase } from "@/server/db";
 import { calendarConfig } from "./config";
+import { CalendarError, safeCalendarFailure } from "./errors";
 import { decrypt, digest, encrypt } from "./crypto";
 import { consentUrl, exchangeCode, readBusy } from "./google";
 import { beginConsent, claimConsent, disconnectCalendar, finishConsent, readConnection } from "./store";
@@ -70,8 +71,11 @@ export async function testCalendar(request: Request) {
     if (request.headers.get("origin") !== config.baseURL) return reply({ error: "Invalid request origin." }, 403);
     const connection = await readConnection(getDatabase());
     if (!connection?.encryptedRefreshToken) return reply({ error: "Connect your calendar first." }, 409);
+    let refreshToken: string;
+    try { refreshToken = decrypt(connection.encryptedRefreshToken, config.key); }
+    catch { throw new CalendarError("credential"); }
     const now = Date.now();
-    const busy = await readBusy(config, decrypt(connection.encryptedRefreshToken, config.key), new Date(now).toISOString(), new Date(now + 7 * 86400000).toISOString());
+    const busy = await readBusy(config, refreshToken, new Date(now).toISOString(), new Date(now + 7 * 86400000).toISOString());
     return reply({ message: `Calendar access works. ${busy.length} busy interval(s) found in the next seven days. No appointments were created.` });
-  } catch { return reply({ error: "Calendar access could not be verified. Check Google Calendar API setup, or reconnect and grant the requested permission." }, 503); }
+  } catch (error) { return reply(safeCalendarFailure(error), 503); }
 }

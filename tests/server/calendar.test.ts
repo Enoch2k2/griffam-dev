@@ -76,3 +76,10 @@ it("can delete the local connection even with a missing encryption key", async (
   expect((await removeCalendar(post())).headers.get("location")).toContain("disconnected");
   expect(disconnectCalendar).toHaveBeenCalledOnce();
 });
+it("distinguishes unreadable credentials from provider failures without exposing secrets", async () => {
+  vi.mocked(readConnection).mockResolvedValue({ encryptedRefreshToken: "bad-secret-token" } as never);
+  const response = await testCalendar(post());
+  expect(response.status).toBe(503);
+  expect(await response.json()).toMatchObject({ code: "credential" });
+  expect(readBusy).not.toHaveBeenCalled();
+});

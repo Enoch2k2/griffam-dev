@@ -1,6 +1,7 @@
 import "server-only";
 import { CodeChallengeMethod, OAuth2Client } from "google-auth-library";
 import type { CalendarConfig } from "./config";
+import { CalendarError, providerError } from "./errors";
 export const busyScope = "https://www.googleapis.com/auth/calendar.freebusy";
 function client(config: CalendarConfig) {
   return new OAuth2Client({ clientId: config.googleClientId, clientSecret: config.googleClientSecret, redirectUri: config.callback,
@@ -25,10 +26,11 @@ export async function exchangeCode(config: CalendarConfig, code: string, verifie
 export function parseBusy(value: unknown): { start: string; end: string }[] {
   const response = value as { calendars?: { primary?: { errors?: unknown[]; busy?: unknown[] } } };
   const calendar = response?.calendars?.primary;
-  if (!calendar || calendar.errors?.length || !Array.isArray(calendar.busy)) throw new Error("Calendar unavailable");
+  if (calendar?.errors?.length) throw new CalendarError("calendar_unavailable");
+  if (!calendar || !Array.isArray(calendar.busy)) throw new CalendarError("invalid_response");
   return calendar.busy.map(value => {
     const item = value as { start?: unknown; end?: unknown };
-    if (typeof item?.start !== "string" || typeof item.end !== "string" || !Number.isFinite(Date.parse(item.start)) || !Number.isFinite(Date.parse(item.end)) || Date.parse(item.start) >= Date.parse(item.end)) throw new Error("Invalid busy interval");
+    if (typeof item?.start !== "string" || typeof item.end !== "string" || !Number.isFinite(Date.parse(item.start)) || !Number.isFinite(Date.parse(item.end)) || Date.parse(item.start) >= Date.parse(item.end)) throw new CalendarError("invalid_response");
     return { start: item.start, end: item.end };
   });
 }
@@ -36,6 +38,8 @@ export async function readBusy(config: CalendarConfig, refreshToken: string, sta
   if (!Number.isFinite(Date.parse(start)) || !Number.isFinite(Date.parse(end)) || Date.parse(end) <= Date.parse(start) || Date.parse(end) - Date.parse(start) > 32 * 86400000) throw new Error("Invalid calendar range");
   const oauth = client(config);
   oauth.setCredentials({ refresh_token: refreshToken });
+  try {
   const response = await oauth.request({ url: "https://www.googleapis.com/calendar/v3/freeBusy", method: "POST", data: { timeMin: start, timeMax: end, items: [{ id: "primary" }] }, timeout: 10_000, retry: false });
   return parseBusy(response.data);
+  } catch (error) { throw providerError(error); }
 }
