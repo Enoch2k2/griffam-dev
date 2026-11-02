@@ -137,3 +137,15 @@ export const bookingAvailability = pgTable("booking_availability", {
   version: integer("version").notNull(),
   updatedAt: date("updated_at").notNull().defaultNow(),
 });
+
+export const calendarConnection = pgTable("calendar_connection", {
+  id: text("id").primaryKey(),
+  ownerId: text("owner_id").notNull(),
+  encryptedRefreshToken: text("encrypted_refresh_token"),
+  accountEmail: text("account_email"),
+  connectedAt: date("connected_at"),
+  revision: integer("revision").notNull().default(1),
+  stateHash: text("state_hash"),
+  encryptedVerifier: text("encrypted_verifier"),
+  stateExpiresAt: date("state_expires_at"),
+});

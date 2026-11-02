@@ -11,5 +11,5 @@ export default function Page() { return <Suspense fallback={<p role="status">Che
 async function Content() {
   if ((await getAdminAccess(await headers())).status !== "authorized") redirect("/admin/sign-in");
   const settings = await readSettings(getDatabase());
-  return <div className="shell"><main id="main"><section className="page-section"><Link href="/admin">← Administration</Link><p className="eyebrow">Booking setup</p><h1>Make room for good conversations.</h1><p className="lead">Set your weekly hours and days off. Google Calendar connection and public reservations are coming next.</p><AvailabilityEditor initial={settings} now={new Date().toISOString()} /></section></main></div>;
+  return <div className="shell"><main id="main"><section className="page-section"><Link href="/admin">← Administration</Link><p className="eyebrow">Booking setup</p><h1>Make room for good conversations.</h1><p className="lead">Set your weekly hours and days off. Connect Google Calendar separately; public reservations are coming next.</p><p><Link href="/admin/calendar">Connect Google Calendar →</Link></p><AvailabilityEditor initial={settings} now={new Date().toISOString()} /></section></main></div>;
 }
