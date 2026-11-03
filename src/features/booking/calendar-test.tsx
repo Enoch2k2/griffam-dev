@@ -8,7 +8,7 @@ export function CalendarTest() {
     try {
       const response = await fetch("/api/admin/calendar/test", { method: "POST" });
       const body = await response.json();
-      setMessage(response.ok ? body.message : body.error);
+      setMessage(response.ok ? body.message : `${body.error}${body.diagnostic ? ` Diagnostic: ${body.diagnostic}` : ""}`);
     } catch { setMessage("Could not reach the server. Try again."); }
     finally { setPending(false); }
   }

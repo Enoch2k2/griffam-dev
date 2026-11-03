@@ -77,5 +77,9 @@ export async function testCalendar(request: Request) {
     const now = Date.now();
     const busy = await readBusy(config, refreshToken, new Date(now).toISOString(), new Date(now + 7 * 86400000).toISOString());
     return reply({ message: `Calendar access works. ${busy.length} busy interval(s) found in the next seven days. No appointments were created.` });
-  } catch (error) { return reply(safeCalendarFailure(error), 503); }
+  } catch (error) {
+    const failure = safeCalendarFailure(error);
+    console.warn("Calendar access test failed", { code: failure.code, diagnostic: failure.diagnostic ?? "local" });
+    return reply(failure, 503);
+  }
 }
