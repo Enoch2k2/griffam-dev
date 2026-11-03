@@ -82,3 +82,19 @@ production contains only the new Calendar table and its primary key.
 `npm audit` still reports 17 dependency advisories (16 moderate in the lint tooling,
 one high through jsdom's undici). These are outside the new Google adapter; no
 breaking dependency upgrades were applied in this feature PR.
+
+## Troubleshooting the access test
+
+The owner test distinguishes disabled API (`api_disabled`), rejected/expired grant
+(`reconnect`), OAuth client credentials (`oauth_client`), missing permissions
+(`permission`), unreadable saved credential (`credential`), unavailable calendar
+(`calendar_unavailable`), unexpected response (`invalid_response`), and transient
+Google failures (`temporary`). Unrecognized failures retain the generic message.
+The response includes a fixed diagnostic code and an actionable message; raw Google
+errors, headers, token values and request configuration are never exposed.
+
+If the old generic message appears, it does not establish that Google Calendar API
+is disabled. Confirm API enablement in the project that owns the configured OAuth
+client. After deploying the diagnostics update, run the access test again and use
+its specific instruction. Do not regenerate CALENDAR_TOKEN_KEY merely to test it:
+changing that key makes the existing credential unreadable until reconnecting.
