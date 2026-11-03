@@ -98,3 +98,13 @@ is disabled. Confirm API enablement in the project that owns the configured OAut
 client. After deploying the diagnostics update, run the access test again and use
 its specific instruction. Do not regenerate CALENDAR_TOKEN_KEY merely to test it:
 changing that key makes the existing credential unreadable until reconnecting.
+
+The test also displays a safe diagnostic such as
+`freebusy/403/ACCESS_TOKEN_SCOPE_INSUFFICIENT` or `token-refresh/400/invalid_grant`.
+The same diagnostic and fixed application code are logged in Render as
+`Calendar access test failed`. Only recognized provider reason codes, bounded HTTP
+statuses and fixed endpoint labels are included. Unknown reasons remain
+`unrecognized`; no raw message, URL, headers, token or email is logged. This separates
+an authorization-server rejection from a Calendar API rejection without assuming
+that every 403 is a Workspace policy issue. These diagnostics identify evidence for
+the next fix; they do not themselves resolve the reported production denial.
