@@ -26,9 +26,9 @@ Google sign-in remains unchanged. Event-write consent will be added with reserva
 5. After this PR is merged, CI passes, and Render deploys migration 0005, sign in
    as the owner and visit `/admin/calendar`. Choose **Connect Google Calendar**,
    use `enoch.griffith@griffamdev.dev`, and grant the requested busy-time permission.
-6. Click **Test calendar access**. Success reports the number of busy intervals in
-   the next seven days; it sends no invitations or emails. A missing API, revoked
-   token, declined scope or provider failure shows an error, never a false empty result.
+6. Save your hours in **Manage availability**, then visit `/book` and choose
+   **View available times**. This reads busy times without creating appointments
+   or sending emails. Provider failures show unavailable instead of offering times.
 
 The Google flow must be tested by the owner after setup. Automated tests use mocked
 Google responses and disposable databases; they do not prove real Google consent.
@@ -50,7 +50,10 @@ The form works with server-rendered POSTs, so Google navigation is not a fetch r
   grant: doing that could also invalidate the existing Google sign-in integration.
   Full revocation is available in Google's third-party connections settings.
 - Reconnect failures preserve an existing connection. The UI says connected when a
-  credential exists; **Test calendar access** verifies its current provider health.
+  credential exists; it does not certify current provider health. The public
+  availability lookup checks Google before offering any times. The owner-only
+  diagnostic POST endpoint remains available for troubleshooting, but its button
+  has been removed from the Calendar page.
 - Losing/changing `CALENDAR_TOKEN_KEY` makes stored tokens unreadable. Keep it in
   Render's secrets; after a deliberate rotation, reconnect the calendar. Local
   disconnect works even if the key is missing. Restore the key when rolling back.
@@ -99,7 +102,7 @@ client. After deploying the diagnostics update, run the access test again and us
 its specific instruction. Do not regenerate CALENDAR_TOKEN_KEY merely to test it:
 changing that key makes the existing credential unreadable until reconnecting.
 
-The test also displays a safe diagnostic such as
+The owner-only `POST /api/admin/calendar/test` endpoint also returns a safe diagnostic such as
 `freebusy/403/ACCESS_TOKEN_SCOPE_INSUFFICIENT` or `token-refresh/400/invalid_grant`.
 The same diagnostic and fixed application code are logged in Render as
 `Calendar access test failed`. Only recognized provider reason codes, bounded HTTP

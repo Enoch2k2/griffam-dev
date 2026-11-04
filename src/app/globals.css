@@ -577,3 +577,22 @@ h3 {
 .call-day h2 { font-size: 19px; margin: 0 0 16px; }
 .call-day ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
 .call-day li { font-size: 14px; }
+
+.calendar-connection { max-width: 780px; margin-top: 32px; padding: 28px; border: 1px solid var(--line); border-radius: 12px; background: var(--featured-surface); }
+.calendar-connection-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+.calendar-connection-heading h2 { margin: 0; font-size: 22px; }
+.calendar-connection-status { border: 1px solid var(--line); border-radius: 100px; padding: 6px 12px; font-size: 13px; }
+.calendar-account { margin: 12px 0 24px; color: var(--muted); overflow-wrap: anywhere; }
+.calendar-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.calendar-controls form, .calendar-disconnect form { margin: 0; }
+.calendar-connection .button { min-height: 46px; cursor: pointer; }
+.calendar-connection .button:hover { filter: brightness(.92); }
+.calendar-disconnect { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--line); }
+.calendar-disconnect h3 { margin: 0; font-size: 16px; }
+.calendar-disconnect .form-help { margin: 6px 0 0; max-width: 430px; }
+.calendar-disconnect .button.secondary { border-color: var(--line); }
+@media (max-width: 540px) {
+  .calendar-connection { padding: 20px; }
+  .calendar-controls { align-items: stretch; flex-direction: column; }
+  .calendar-controls .button { width: 100%; }
+}
