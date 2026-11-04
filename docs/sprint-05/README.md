@@ -1,10 +1,28 @@
 # Sprint 5 — Custom booking
 
-Status: owner availability merged. The next slice adds owner Google Calendar consent,
-encrypted credential storage, disconnect/reconnect and a seven-day free/busy access
-test. It requires provider configuration and owner consent before live validation.
-The public booking page remains a planned-feature page; no appointments are created.
+Status: owner availability and Google Calendar connection are merged. Enoch confirmed
+that the real Calendar test passes after reactivating Google Workspace. Public
+availability browsing is the current slice; online reservations remain disabled.
 See [Google Calendar setup](../google-calendar.md).
+
+## Public availability browsing
+
+Enoch confirmed a 30-day browsing window on 2026-11-04. `/book` loads available
+30-minute calls on demand from `/api/booking/availability`. Visitors can choose a
+time zone or use their browser's zone; dates are grouped in the selected zone.
+The horizon is today plus 29 days in the owner's zone. The existing 24-hour notice,
+working hours, closed dates and buffers still apply.
+
+Only saved owner hours are published. Each request reads current settings and Google
+free/busy; failures return a generic unavailable response, never an empty busy list.
+Responses are not cached and contain only candidate start/end times, the calculation
+time and window length. Provider credentials, owner identity and busy intervals are
+not returned. The query covers local-day boundaries with buffer padding across DST.
+
+This is read-only browsing: no holds, bookings, event writes or emails. Times can
+change; reservation work must recheck Google and local reservations at submission.
+Public endpoint rate limiting and request coalescing remain launch-hardening work.
+No new environment variables, scopes or migrations are required.
 
 ## Confirmed by Enoch (2026-10-27)
 
@@ -42,8 +60,7 @@ Google request must never be represented by an empty busy list in the public flo
 
 ## Remaining booking slices
 
-1. Complete real-provider validation of the owner Calendar connection after setup.
-   Existing Google sign-in does not grant calendar access; use `/admin/calendar`.
+1. Validate the public availability view against the owner’s real calendar after deployment.
 2. Visitor calendar, timezone display, details/review flow and transactional slot
    reservations. Recheck external conflicts; never claim atomicity across Google
    Calendar and PostgreSQL. Add idempotent event creation and recovery/reconciliation.
@@ -51,7 +68,7 @@ Google request must never be represented by an empty busy list in the public flo
    cancellation/rescheduling, reminders and failure recovery.
 4. End-to-end provider and race tests before enabling public booking.
 
-Still to confirm: booking horizon, cancellation/rescheduling deadline, reminder
+Still to confirm: cancellation/rescheduling deadline, reminder
 schedule, meeting location/Google Meet, and which calendars block availability.
 The current preview horizon is not a published booking policy.
 
