@@ -569,3 +569,11 @@ h3 {
 .availability-day input[type="checkbox"] { width: 18px; height: 18px; margin-right: 8px; }
 .post-preview details { padding: 12px 0; border-bottom: 1px solid var(--line); }
 .post-preview summary { cursor: pointer; }
+
+.call-times { margin-top: 32px; }
+.call-times .form-field { max-width: 480px; }
+.call-days { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 20px; }
+.call-day { border: 1px solid var(--line); border-radius: 12px; padding: 20px; }
+.call-day h2 { font-size: 19px; margin: 0 0 16px; }
+.call-day ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.call-day li { font-size: 14px; }
