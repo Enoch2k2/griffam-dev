@@ -8,6 +8,7 @@ import { readBusy } from "@/server/calendar/google";
 import { readConnection } from "@/server/calendar/store";
 import { readSettings } from "./settings";
 import { reservationBusy } from "./reservations";
+import { readBookingRuntime } from "./readiness";
 
 export const BROWSE_DAYS = 30;
 const unavailable = "Call times are temporarily unavailable. Please try again or contact Enoch.";
@@ -18,7 +19,7 @@ export async function publicAvailability() {
     const config = calendarConfig();
     if (!config) throw new Error("Calendar not configured");
     const db = getDatabase();
-    const [settings, connection] = await Promise.all([readSettings(db), readConnection(db)]);
+    const [settings, connection, runtime] = await Promise.all([readSettings(db), readConnection(db), readBookingRuntime(db)]);
     if (!settings.version || !connection?.encryptedRefreshToken) throw new Error("Availability not published");
     const now = Temporal.Now.instant();
     const first = now.toZonedDateTimeISO(settings.timeZone).startOfDay();
@@ -30,7 +31,7 @@ export async function publicAvailability() {
     const reserved = await reservationBusy(db, new Date(start), new Date(end));
     const slots = candidateSlots(settings, now.toString(), BROWSE_DAYS, [...busy, ...reserved])
       .map(({ start, end }) => ({ start, end }));
-    return Response.json({ slots, checkedAt: now.toString(), days: BROWSE_DAYS }, { headers });
+    return Response.json({ slots, checkedAt: now.toString(), days: BROWSE_DAYS, bookingEnabled: runtime !== null }, { headers });
   } catch {
     // Public responses must not expose owner identity, credentials or busy periods.
     return Response.json({ error: unavailable }, { status: 503, headers });

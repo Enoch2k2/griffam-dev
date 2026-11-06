@@ -4,7 +4,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vites
 import { eq, sql } from "drizzle-orm";
 import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { createDatabase } from "../../src/server/db/connection";
-import { emailJob, inquiry } from "../../src/server/db/schema";
+import { bookingReservation, emailJob, inquiry } from "../../src/server/db/schema";
+import { enqueueBookingEmails } from "../../src/server/email/booking";
 import { saveInquiry } from "../../src/server/inquiries/store";
 import { claimEmail, drainEmail } from "../../src/server/email/worker";
 const testURL = process.env.TEST_DATABASE_URL;
@@ -24,7 +25,7 @@ describe.skipIf(!testURL)("transactional inquiry outbox", () => {
     database = createDatabase(url.toString());
     await migrate(database.db, { migrationsFolder: "./drizzle" });
   });
-  beforeEach(async () => { await database.db.delete(inquiry); });
+  beforeEach(async () => { await database.db.delete(inquiry); await database.db.delete(bookingReservation); });
   afterAll(async () => {
     await database?.pool.end();
     if (control) { await control.query(`DROP DATABASE IF EXISTS "${name}"`); await control.end(); }
@@ -103,5 +104,48 @@ describe.skipIf(!testURL)("transactional inquiry outbox", () => {
     await database.db.update(emailJob).set({ status: "pending", attempts: 7, availableAt: new Date(0) });
     send.mockResolvedValue({ status: "retry", error: "provider_unreachable" });
     expect((await drainEmail(database.db, "key", send)).review).toBe(2);
+  });
+
+  const booking = () => ({
+    id: randomUUID(), email: "visitor@example.com", start: "2026-11-09T15:00:00Z", end: "2026-11-09T15:30:00Z",
+    timeZone: "America/Chicago", joinUrl: "https://us02web.zoom.us/j/123456789?pwd=participant",
+  });
+  async function insertBooking(data: ReturnType<typeof booking>) {
+    await database.db.insert(bookingReservation).values({
+      id: data.id, requestHash: "test", name: "Visitor", email: data.email, timeZone: data.timeZone, notes: "Private notes",
+      startsAt: new Date(data.start), endsAt: new Date(data.end), occupiedUntil: new Date("2026-11-09T16:00:00Z"),
+      expiresAt: new Date("2026-11-09T14:00:00Z"),
+    });
+  }
+  it("queues immutable booking emails once and filters immediate delivery to that booking", async () => {
+    const data = booking();
+    await insertBooking(data);
+    await saveInquiry(database.db, input(), config);
+    await database.db.transaction(tx => enqueueBookingEmails(tx, data, config));
+    await database.db.transaction(tx => enqueueBookingEmails(tx, data, { ...config, owner: "changed@example.com" }));
+    const jobs = await database.db.select().from(emailJob).where(eq(emailJob.bookingId, data.id));
+    expect(jobs).toHaveLength(2);
+    expect(jobs.every(job => job.inquiryId === null)).toBe(true);
+    expect(jobs.find(job => job.kind === "booking-owner")?.payload.to).toEqual([config.owner]);
+    const send = vi.fn().mockResolvedValue({ status: "accepted", id: "booking-provider-id" });
+    await drainEmail(database.db, "key", send, undefined, data.id);
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(send.mock.calls.every(call => call[1].endsWith(data.id))).toBe(true);
+    await drainEmail(database.db, "key", send);
+    expect(send).toHaveBeenCalledTimes(4);
+  });
+
+  it("rolls back booking confirmation when its email outbox insertion fails", async () => {
+    const data = booking();
+    await insertBooking(data);
+    await database.db.execute(sql`alter table email_job add constraint test_no_booking_jobs check (booking_id is null)`);
+    try {
+      await expect(database.db.transaction(async tx => {
+        await tx.update(bookingReservation).set({ status: "confirmed" }).where(eq(bookingReservation.id, data.id));
+        await enqueueBookingEmails(tx, data, config);
+      })).rejects.toThrow();
+      expect((await database.db.select().from(bookingReservation))[0].status).toBe("held");
+      expect(await database.db.select().from(emailJob)).toHaveLength(0);
+    } finally { await database.db.execute(sql`alter table email_job drop constraint test_no_booking_jobs`); }
   });
 });

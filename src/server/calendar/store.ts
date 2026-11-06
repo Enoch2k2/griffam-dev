@@ -18,8 +18,8 @@ export async function claimConsent(db: Database, ownerId: string, stateHash: str
     .returning();
   return row ?? null;
 }
-export async function finishConsent(db: Database, revision: number, stateHash: string, encryptedRefreshToken: string, accountEmail: string) {
-  const rows = await db.update(table).set({ encryptedRefreshToken, accountEmail, connectedAt: new Date(), stateHash: null, encryptedVerifier: null })
+export async function finishConsent(db: Database, revision: number, stateHash: string, encryptedRefreshToken: string, accountEmail: string, eventWriteGranted = false) {
+  const rows = await db.update(table).set({ encryptedRefreshToken, accountEmail, eventWriteGranted, connectedAt: new Date(), stateHash: null, encryptedVerifier: null })
     .where(and(eq(table.id, "owner"), eq(table.revision, revision), eq(table.stateHash, stateHash))).returning({ id: table.id });
   return rows.length === 1;
 }

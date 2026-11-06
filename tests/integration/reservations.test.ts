@@ -29,7 +29,7 @@ describe.skipIf(!testURL)("reservation concurrency", () => {
     const fullDay = candidates.find(slot => candidates.filter(other => other.date === slot.date).length >= 8)!.date;
     slots = candidates.filter(slot => slot.date === fullDay);
   });
-  beforeEach(async () => { await database.pool.query("truncate booking_reservation"); });
+  beforeEach(async () => { await database.pool.query("truncate email_job, booking_reservation"); });
   afterAll(async () => {
     await database?.pool.end();
     if (control) { await control.query(`DROP DATABASE IF EXISTS "${name}"`); await control.end(); }
@@ -71,6 +71,6 @@ describe.skipIf(!testURL)("reservation concurrency", () => {
   it("enforces a persistent per-email limit and a database overlap constraint", async () => {
     for (const i of [0, 2, 4]) expect((await holdReservation(database.db, input(i), empty)).status).toBe("held");
     expect((await holdReservation(database.db, input(6), empty)).status).toBe("limited");
-    await expect(database.pool.query("insert into booking_reservation select $1, request_hash, name, email, time_zone, notes, starts_at, ends_at, occupied_until, status, expires_at, created_at from booking_reservation limit 1", [randomUUID()])).rejects.toMatchObject({ code: "23P01" });
+    await expect(database.pool.query("insert into booking_reservation (id, request_hash, name, email, time_zone, notes, starts_at, ends_at, occupied_until, status, expires_at, created_at) select $1, request_hash, name, email, time_zone, notes, starts_at, ends_at, occupied_until, status, expires_at, created_at from booking_reservation limit 1", [randomUUID()])).rejects.toMatchObject({ code: "23P01" });
   });
 });

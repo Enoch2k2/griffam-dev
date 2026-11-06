@@ -33,12 +33,13 @@ async function AdminContent() {
           <h1>Welcome, {access.user.name}.</h1>
           <p className="lead">Your owner access is active.</p>
           <p>
-            Manage your articles, resume and project inquiries. Booking and blog image uploads are coming next.
+            Manage your articles, resume, project inquiries, and discovery calls.
           </p>
           <div className="actions">
             <Link className="button" href="/admin/inquiries">Project inquiries</Link>
             <Link className="button" href="/admin/posts">Manage articles</Link>
             <Link className="button" href="/admin/resume">Manage resume</Link>
+            <Link className="button" href="/admin/bookings">Bookings</Link>
             <Link className="button" href="/admin/availability">Availability</Link>
             <Link className="button" href="/admin/calendar">Google Calendar</Link>
             <AuthButton action="sign-out" />
