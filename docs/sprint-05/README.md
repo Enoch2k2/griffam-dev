@@ -2,7 +2,8 @@
 
 Status: owner availability and Google Calendar connection are merged. Enoch confirmed
 that the real Calendar test passes after reactivating Google Workspace. Public
-availability browsing is the current slice; online reservations remain disabled.
+availability browsing is merged; the current slice adds internal reservation
+storage and conflict protection. Online reservations remain disabled.
 See [Google Calendar setup](../google-calendar.md).
 
 ## Public availability browsing
@@ -68,9 +69,9 @@ Google request must never be represented by an empty busy list in the public flo
    cancellation/rescheduling, reminders and failure recovery.
 4. End-to-end provider and race tests before enabling public booking.
 
-Still to confirm: cancellation/rescheduling deadline, reminder
-schedule, meeting location/Google Meet, and which calendars block availability.
-The current preview horizon is not a published booking policy.
+Still to confirm: cancellation/rescheduling deadline, reminder schedule, and which
+additional calendars block availability. Enoch selected a separate Zoom meeting per
+booking; see [Zoom preparation](../zoom-booking.md). The browsing horizon is 30 days.
 
 ## Deployment and validation
 
@@ -87,3 +88,29 @@ and successful save against disposable local PostgreSQL. Migration also passed o
 the isolated Neon branch. Schema-only branches omit migration-history rows, so the
 four already-existing migrations were recorded there before applying migration 0004;
 no production migration or settings write was performed.
+
+## Reservation foundation (not publicly enabled)
+
+The internal `holdReservation` service validates contact details and a canonical UTC
+slot, rechecks saved hours plus fresh external busy intervals, and creates a ten-minute
+hold. No public mutation endpoint or confirmation button is introduced in this slice.
+A required provider dependency must make the real Google read when wired to the API.
+
+An owner-wide transaction lock serializes holds with schedule saves. PostgreSQL also
+excludes overlapping occupied ranges, including the 30-minute buffer, as defense in
+depth. Limits allow up to three new holds per normalized email and 60 globally per
+hour. Repeated identical request IDs return the original hold without extending it;
+changed details conflict. Expired IDs cannot silently create a new hold. Owner email
+and provider tokens are never returned by this service.
+
+Expired holds stop blocking public availability and are cancelled before inserting
+new holds. Provisioning, confirmed and needs-review records continue blocking until
+explicitly reconciled; they must not expire after an ambiguous provider outcome.
+These states are reserved for the next workflow, not evidence of provider completion.
+The database cannot atomically prevent somebody independently adding a Google event
+between the external read and a local commit; final provisioning must recheck/recover.
+
+Migration 0006 adds the reservation table and custom SQL CHECK/range-exclusion
+constraints (preserve these when editing generated migrations). Tested on disposable
+local PostgreSQL and schema-only Neon branch `dev-booking-reservations`, expiring
+2026-11-11. Production and local credential configuration were not changed.

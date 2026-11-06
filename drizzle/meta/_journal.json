@@ -43,6 +43,13 @@
       "when": 1793601793624,
       "tag": "0005_dusty_korath",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793787373919,
+      "tag": "0006_booking_reservations",
+      "breakpoints": true
     }
   ]
 }
