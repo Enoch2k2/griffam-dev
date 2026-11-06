@@ -1,5 +1,6 @@
 import {
   boolean,
+  check,
   integer,
   jsonb,
   index,
@@ -8,6 +9,7 @@ import {
   timestamp,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 import type { Availability } from "@/features/booking/availability";
 import type { Article } from "@/features/content/validation";
@@ -46,7 +48,8 @@ export const inquiry = pgTable(
 
 export const emailJob = pgTable("email_job", {
   id: text("id").primaryKey(),
-  inquiryId: text("inquiry_id").notNull().references(() => inquiry.id, { onDelete: "cascade" }),
+  inquiryId: text("inquiry_id").references(() => inquiry.id, { onDelete: "cascade" }),
+  bookingId: text("booking_id").references(() => bookingReservation.id, { onDelete: "cascade" }),
   kind: text("kind").notNull(),
   payload: jsonb("payload").$type<EmailPayload>().notNull(),
   status: text("status").notNull().default("pending"),
@@ -61,6 +64,8 @@ export const emailJob = pgTable("email_job", {
 }, table => [
   index("email_job_due_idx").on(table.status, table.availableAt),
   index("email_job_inquiry_idx").on(table.inquiryId),
+  index("email_job_booking_idx").on(table.bookingId),
+  check("email_job_single_subject", sql`num_nonnulls(${table.inquiryId}, ${table.bookingId}) = 1`),
 ]);
 
 export const user = pgTable("auth_user", {
@@ -144,6 +149,7 @@ export const calendarConnection = pgTable("calendar_connection", {
   encryptedRefreshToken: text("encrypted_refresh_token"),
   accountEmail: text("account_email"),
   connectedAt: date("connected_at"),
+  eventWriteGranted: boolean("event_write_granted").notNull().default(false),
   revision: integer("revision").notNull().default(1),
   stateHash: text("state_hash"),
   encryptedVerifier: text("encrypted_verifier"),
@@ -163,5 +169,22 @@ export const bookingReservation = pgTable("booking_reservation", {
   occupiedUntil: date("occupied_until").notNull(),
   status: text("status").notNull().default("held"),
   expiresAt: date("expires_at").notNull(),
+  provisioningToken: text("provisioning_token"),
+  provisioningAt: date("provisioning_at"),
+  zoomMeetingId: text("zoom_meeting_id"),
+  zoomJoinUrl: text("zoom_join_url"),
+  googleEventId: text("google_event_id"),
+  lastError: text("last_error"),
+  confirmedAt: date("confirmed_at"),
   createdAt: date("created_at").notNull().defaultNow(),
-}, table => [index("booking_reservation_email_created_idx").on(table.email, table.createdAt)]);
+}, table => [
+  index("booking_reservation_email_created_idx").on(table.email, table.createdAt),
+  check("booking_reservation_status", sql`${table.status} in ('held', 'provisioning', 'needs_review', 'confirmed', 'cancelled')`),
+  check("booking_reservation_confirmed_effects", sql`${table.status} <> 'confirmed' or (${table.zoomMeetingId} is not null and ${table.zoomJoinUrl} is not null and ${table.googleEventId} is not null and ${table.confirmedAt} is not null)`),
+]);
+
+export const bookingRequestLimit = pgTable("booking_request_limit", {
+  bucket: text("bucket").primaryKey(),
+  attempts: integer("attempts").notNull(),
+  createdAt: date("created_at").notNull().defaultNow(),
+});

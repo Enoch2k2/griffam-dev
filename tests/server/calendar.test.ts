@@ -21,7 +21,7 @@ beforeEach(() => {
   vi.mocked(getAdminAccess).mockResolvedValue({ status: "authorized", user: { id: "owner" } } as never);
   vi.mocked(consentUrl).mockResolvedValue({ url: "https://accounts.google.com/o/oauth2/v2/auth", verifier: "private-verifier" });
   vi.mocked(claimConsent).mockResolvedValue({ revision: 2, encryptedVerifier: encrypt("private-verifier", key) } as never);
-  vi.mocked(exchangeCode).mockResolvedValue({ refreshToken: "private-refresh", email: "owner@example.com" });
+  vi.mocked(exchangeCode).mockResolvedValue({ refreshToken: "private-refresh", email: "owner@example.com", eventWriteGranted: true });
   vi.mocked(finishConsent).mockResolvedValue(true);
 });
 it("denies every endpoint before database/provider work for nonowners", async () => {

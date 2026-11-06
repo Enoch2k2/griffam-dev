@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-const mocks = vi.hoisted(() => ({ config: vi.fn(), settings: vi.fn(), connection: vi.fn(), busy: vi.fn(), decrypt: vi.fn(), reserved: vi.fn() }));
+const mocks = vi.hoisted(() => ({ config: vi.fn(), settings: vi.fn(), connection: vi.fn(), busy: vi.fn(), decrypt: vi.fn(), reserved: vi.fn(), runtime: vi.fn() }));
 vi.mock("@/server/db", () => ({ getDatabase: () => ({}) }));
 vi.mock("@/server/calendar/config", () => ({ calendarConfig: mocks.config }));
 vi.mock("@/server/calendar/store", () => ({ readConnection: mocks.connection }));
@@ -7,6 +7,7 @@ vi.mock("@/server/calendar/crypto", () => ({ decrypt: mocks.decrypt }));
 vi.mock("@/server/calendar/google", () => ({ readBusy: mocks.busy }));
 vi.mock("./reservations", () => ({ reservationBusy: mocks.reserved }));
 vi.mock("./settings", () => ({ readSettings: mocks.settings }));
+vi.mock("./readiness", () => ({ readBookingRuntime: mocks.runtime }));
 import { initialSettings } from "@/features/booking/availability";
 import { publicAvailability } from "./public-availability";
 afterEach(() => vi.useRealTimers());
@@ -17,12 +18,14 @@ beforeEach(() => {
   mocks.connection.mockResolvedValue({ encryptedRefreshToken: "ciphertext", accountEmail: "private@example.com" });
   mocks.reserved.mockResolvedValue([]);
   mocks.decrypt.mockReturnValue("token"); mocks.busy.mockResolvedValue([]);
+  mocks.runtime.mockResolvedValue({});
 });
 it("filters Google conflicts and returns only available times without private calendar data", async () => {
   mocks.busy.mockResolvedValue([{ start: "2026-11-02T15:00:00Z", end: "2026-11-02T16:00:00Z" }]);
   const response = await publicAvailability(); const body = await response.json();
   expect(response.status).toBe(200); expect(response.headers.get("cache-control")).toBe("no-store");
   expect(body.days).toBe(30);
+  expect(body.bookingEnabled).toBe(true);
   expect(body.slots).not.toContainEqual({ start: "2026-11-02T15:00:00Z", end: "2026-11-02T15:30:00Z" });
   expect(body.slots).toContainEqual({ start: "2026-11-02T16:30:00Z", end: "2026-11-02T17:00:00Z" });
   expect(JSON.stringify(body)).not.toMatch(/token|ciphertext|private@example|busy/);
@@ -47,6 +50,11 @@ it("distinguishes a genuinely empty calendar window from an outage", async () =>
   mocks.settings.mockResolvedValue({ ...initialSettings, hours: [], version: 1 });
   const response = await publicAvailability();
   expect(response.status).toBe(200); expect((await response.json()).slots).toEqual([]);
+});
+it("keeps availability browse-only when confirmation readiness is incomplete", async () => {
+  mocks.runtime.mockResolvedValue(null);
+  const body = await (await publicAvailability()).json();
+  expect(body.bookingEnabled).toBe(false); expect(Array.isArray(body.slots)).toBe(true);
 });
 
 it("removes local holds and their buffers even when Google is empty", async () => {

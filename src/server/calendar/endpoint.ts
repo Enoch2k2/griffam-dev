@@ -49,7 +49,7 @@ export async function calendarCallback(request: NextRequest) {
     const code = request.nextUrl.searchParams.get("code");
     if (!code || code.length > 4096) return bounce(config.baseURL, "failed");
     const tokens = await exchangeCode(config, code, decrypt(pending.encryptedVerifier, config.key));
-    const savedConnection = await finishConsent(db, pending.revision, digest(state), encrypt(tokens.refreshToken, config.key), tokens.email);
+    const savedConnection = await finishConsent(db, pending.revision, digest(state), encrypt(tokens.refreshToken, config.key), tokens.email, tokens.eventWriteGranted);
     return bounce(config.baseURL, savedConnection ? "connected" : "failed");
   } catch { return bounce(config.baseURL, "failed"); }
 }

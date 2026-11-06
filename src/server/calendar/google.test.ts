@@ -1,15 +1,16 @@
-import { expect, it, vi } from "vitest";
-const mocks = vi.hoisted(() => ({ getToken: vi.fn(), verifyIdToken: vi.fn(), request: vi.fn(), setCredentials: vi.fn() }));
+import { afterEach, expect, it, vi } from "vitest";
+const mocks = vi.hoisted(() => ({ getToken: vi.fn(), verifyIdToken: vi.fn(), request: vi.fn(), setCredentials: vi.fn(), generateCodeVerifierAsync: vi.fn(), generateAuthUrl: vi.fn() }));
 vi.mock("google-auth-library", () => ({ CodeChallengeMethod: { S256: "S256" }, OAuth2Client: class {
+  generateCodeVerifierAsync = mocks.generateCodeVerifierAsync; generateAuthUrl = mocks.generateAuthUrl;
   getToken = mocks.getToken; verifyIdToken = mocks.verifyIdToken; request = mocks.request; setCredentials = mocks.setCredentials;
 } }));
-import { busyScope, exchangeCode, parseBusy, readBusy } from "./google";
+import { busyScope, eventScope, consentUrl, exchangeCode, parseBusy, readBusy } from "./google";
 import type { CalendarConfig } from "./config";
 const config = { googleClientId: "client", ownerEmail: "owner@example.com" } as CalendarConfig;
 it("accepts a verified owner only with refresh token and free/busy scope", async () => {
   mocks.getToken.mockResolvedValue({ tokens: { id_token: "id", refresh_token: "refresh", scope: busyScope } });
   mocks.verifyIdToken.mockResolvedValue({ getPayload: () => ({ email: "owner@example.com", email_verified: true }) });
-  expect(await exchangeCode(config, "code", "verifier")).toEqual({ email: "owner@example.com", refreshToken: "refresh" });
+  expect(await exchangeCode(config, "code", "verifier")).toEqual({ email: "owner@example.com", refreshToken: "refresh", eventWriteGranted: false });
   expect(mocks.verifyIdToken).toHaveBeenCalledWith({ idToken: "id", audience: "client" });
   mocks.verifyIdToken.mockResolvedValue({ getPayload: () => ({ email: "other@example.com", email_verified: true }) });
   await expect(exchangeCode(config, "code", "verifier")).rejects.toThrow();
@@ -37,4 +38,21 @@ it("classifies Google request failures and rejects malformed successful response
   await expect(readBusy(...args)).rejects.toMatchObject({ code: "calendar_unavailable" });
   mocks.request.mockResolvedValue({ data: { calendars: { primary: { busy: [] } } } });
   await expect(readBusy(...args)).resolves.toEqual([]);
+});
+
+afterEach(() => vi.unstubAllEnvs());
+it("only requests and requires event-write permission when enabled", async () => {
+  mocks.generateCodeVerifierAsync.mockResolvedValue({ codeVerifier: "verifier", codeChallenge: "challenge" });
+  mocks.generateAuthUrl.mockReturnValue("https://accounts.google.com/consent");
+  vi.stubEnv("CALENDAR_EVENTS_ENABLED", "false");
+  await consentUrl(config, "state");
+  expect(mocks.generateAuthUrl.mock.lastCall?.[0].scope).toEqual(["openid", "email", busyScope]);
+  vi.stubEnv("CALENDAR_EVENTS_ENABLED", "true");
+  await consentUrl(config, "state");
+  expect(mocks.generateAuthUrl.mock.lastCall?.[0].scope).toEqual(["openid", "email", busyScope, eventScope]);
+  mocks.getToken.mockResolvedValue({ tokens: { id_token: "id", refresh_token: "refresh", scope: busyScope } });
+  await expect(exchangeCode(config, "code", "verifier")).rejects.toThrow("Incomplete calendar consent");
+  mocks.getToken.mockResolvedValue({ tokens: { id_token: "id", refresh_token: "refresh", scope: `${busyScope} ${eventScope}` } });
+  mocks.verifyIdToken.mockResolvedValue({ getPayload: () => ({ email: "owner@example.com", email_verified: true }) });
+  await expect(exchangeCode(config, "code", "verifier")).resolves.toMatchObject({ eventWriteGranted: true });
 });
