@@ -36,6 +36,30 @@ it("offers selectable slots only when booking is explicitly enabled", async () =
   expect(screen.getByRole("heading", { name: "Your details" })).toBeInTheDocument();
   expect(screen.queryByLabelText("Display time zone")).not.toBeInTheDocument();
 });
+it("shows times for only the selected day without fetching again", async () => {
+  const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ bookingEnabled: true, days: 30, slots: [
+    { start: "2026-11-05T15:00:00Z", end: "2026-11-05T15:30:00Z" },
+    { start: "2026-11-06T16:00:00Z", end: "2026-11-06T16:30:00Z" },
+  ] }) });
+  vi.stubGlobal("fetch", fetcher); render(<CallTimes timeZones={["America/Chicago"]} />);
+  await userEvent.click(screen.getByRole("button", { name: "View available times" }));
+  expect(screen.getByRole("button", { name: /Book Thursday, November 5.*9:00 AM CST/ })).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /Book Friday/ })).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Friday, November 6, 2026, 1 available time" }));
+  expect(screen.getByRole("button", { name: /Book Friday, November 6.*10:00 AM CST/ })).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /Book Thursday/ })).not.toBeInTheDocument();
+  expect(fetcher).toHaveBeenCalledOnce();
+});
+it("refreshes after choosing another time and preserves the selected day", async () => {
+  const response = { ok: true, json: async () => ({ bookingEnabled: true, days: 30, slots: [{ start: "2026-11-05T15:00:00Z", end: "2026-11-05T15:30:00Z" }] }) };
+  const fetcher = vi.fn().mockResolvedValue(response);
+  vi.stubGlobal("fetch", fetcher); render(<CallTimes timeZones={["America/Chicago"]} />);
+  await userEvent.click(screen.getByRole("button", { name: "View available times" }));
+  await userEvent.click(screen.getByRole("button", { name: /Book Thursday/ }));
+  await userEvent.click(screen.getByRole("button", { name: "Choose another time" }));
+  expect(await screen.findByRole("button", { name: /Book Thursday/ })).toBeInTheDocument();
+  expect(fetcher).toHaveBeenCalledTimes(2);
+});
 it("fails closed on malformed availability instead of rendering unsafe slots", async () => {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ bookingEnabled: true, days: 30, slots: [{ start: "bad", end: "also-bad" }] }) }));
   render(<CallTimes timeZones={["America/Chicago"]} />);

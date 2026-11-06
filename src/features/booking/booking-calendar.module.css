@@ -1,0 +1,166 @@
+.bookingCalendarLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(260px, .95fr);
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.bookingCalendarPanel,
+.bookingTimesPanel {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--featured-surface);
+  padding: clamp(16px, 3vw, 28px);
+}
+
+.bookingTimesPanel { background: var(--background); }
+
+.bookingMonthHeader {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.bookingMonthHeader h2 {
+  text-align: center;
+  font-size: clamp(20px, 3vw, 26px);
+  letter-spacing: -.5px;
+}
+
+.bookingMonthButton {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+  cursor: pointer;
+  font-size: 20px;
+}
+
+.bookingMonthButton:disabled { cursor: not-allowed; opacity: .38; }
+
+.bookingCalendarTable {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 4px;
+}
+
+.bookingCalendarTable th {
+  padding: 0 0 7px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bookingCalendarTable abbr { text-decoration: none; }
+.bookingCalendarTable td { height: 48px; padding: 0; text-align: center; }
+
+.bookingDayButton {
+  position: relative;
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+}
+
+.bookingDayButton:not(:disabled) {
+  border-color: color-mix(in srgb, var(--focus) 45%, var(--line));
+  background: var(--background);
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.bookingDayButton:not(:disabled):hover { border-color: var(--focus); }
+.bookingDayButton:disabled { cursor: default; opacity: .48; }
+.bookingDayButton[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+.bookingDayButton[aria-current="date"] { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+.bookingDayMarker {
+  display: block;
+  height: 8px;
+  color: var(--highlight);
+  font-size: 18px;
+  line-height: 6px;
+}
+
+.bookingDayButton[aria-pressed="true"] .bookingDayMarker { color: var(--accent); }
+
+.bookingCalendarLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.bookingCalendarLegend > span { display: inline-flex; align-items: center; gap: 6px; }
+.bookingLegendMarker { color: var(--highlight); font-size: 22px; line-height: 10px; }
+.bookingSelectedSwatch { width: 12px; height: 12px; border-radius: 3px; background: var(--primary); }
+
+.bookingPanelKicker {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.bookingTimesPanel h2 { font-size: clamp(22px, 3vw, 30px); }
+.bookingTimeZone { margin: 12px 0 0; color: var(--muted); line-height: 1.6; }
+.bookingSelectionStatus { margin: 18px 0 12px; font-size: 14px; }
+
+.bookingTimeList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bookingTimeButton,
+.bookingBrowseTime {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 13px;
+  text-align: center;
+}
+
+.bookingTimeButton { cursor: pointer; }
+.bookingTimeButton:hover { border-color: var(--focus); background: var(--featured-surface); }
+.bookingBrowseTime { color: var(--muted); }
+.bookingEmptySelection { max-width: 28rem; }
+.bookingEmptySelection p:last-child { color: var(--muted); line-height: 1.6; }
+
+@media (max-width: 760px) {
+  .bookingCalendarLayout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 380px) {
+  .bookingCalendarPanel, .bookingTimesPanel { padding: 14px 10px; }
+  .bookingCalendarTable { border-spacing: 2px; }
+  .bookingCalendarTable td { height: 44px; }
+  .bookingDayButton { min-height: 42px; padding-inline: 2px; }
+  .bookingTimeList { grid-template-columns: 1fr; }
+}
