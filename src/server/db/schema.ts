@@ -149,3 +149,19 @@ export const calendarConnection = pgTable("calendar_connection", {
   encryptedVerifier: text("encrypted_verifier"),
   stateExpiresAt: date("state_expires_at"),
 });
+
+// Holds are internal until meeting provisioning and confirmation are wired.
+export const bookingReservation = pgTable("booking_reservation", {
+  id: text("id").primaryKey(),
+  requestHash: text("request_hash").notNull(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  timeZone: text("time_zone").notNull(),
+  notes: text("notes").notNull(),
+  startsAt: date("starts_at").notNull(),
+  endsAt: date("ends_at").notNull(),
+  occupiedUntil: date("occupied_until").notNull(),
+  status: text("status").notNull().default("held"),
+  expiresAt: date("expires_at").notNull(),
+  createdAt: date("created_at").notNull().defaultNow(),
+}, table => [index("booking_reservation_email_created_idx").on(table.email, table.createdAt)]);

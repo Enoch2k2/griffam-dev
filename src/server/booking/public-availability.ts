@@ -7,6 +7,7 @@ import { decrypt } from "@/server/calendar/crypto";
 import { readBusy } from "@/server/calendar/google";
 import { readConnection } from "@/server/calendar/store";
 import { readSettings } from "./settings";
+import { reservationBusy } from "./reservations";
 
 export const BROWSE_DAYS = 30;
 const unavailable = "Call times are temporarily unavailable. Please try again or contact Enoch.";
@@ -26,7 +27,8 @@ export async function publicAvailability() {
     const start = first.toInstant().subtract({ minutes: BUFFER_MINUTES }).toString();
     const end = first.add({ days: BROWSE_DAYS }).toInstant().add({ minutes: BUFFER_MINUTES }).toString();
     const busy = await readBusy(config, decrypt(connection.encryptedRefreshToken, config.key), start, end);
-    const slots = candidateSlots(settings, now.toString(), BROWSE_DAYS, busy)
+    const reserved = await reservationBusy(db, new Date(start), new Date(end));
+    const slots = candidateSlots(settings, now.toString(), BROWSE_DAYS, [...busy, ...reserved])
       .map(({ start, end }) => ({ start, end }));
     return Response.json({ slots, checkedAt: now.toString(), days: BROWSE_DAYS }, { headers });
   } catch {
