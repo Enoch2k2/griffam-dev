@@ -40,6 +40,7 @@ describe.skipIf(!testURL)("booking confirmation orchestration", () => {
     const data = input(); const deps = dependencies();
     const first = await confirmReservation(database.db, data, runtime, deps);
     expect(first).toMatchObject({ status: "confirmed", id: data.id, emailQueued: true });
+    expect(deps.ensureCalendarEvent).toHaveBeenCalledWith({}, "refresh", expect.objectContaining({ name: data.name, email: data.email, notes: data.notes, timeZone: data.timeZone, joinUrl: meeting().joinUrl }));
     expect(deps.createZoomMeeting).toHaveBeenCalledOnce(); expect(deps.ensureCalendarEvent).toHaveBeenCalledOnce(); expect(deps.scheduleBookingEmails).toHaveBeenCalledOnce();
     const [saved] = await database.db.select().from(bookingReservation).where(eq(bookingReservation.id, data.id));
     expect(saved).toMatchObject({ status: "confirmed", zoomMeetingId: "12345678901", googleEventId: "google-event" });
@@ -71,6 +72,7 @@ describe.skipIf(!testURL)("booking confirmation orchestration", () => {
     expect((await database.db.select().from(bookingReservation))[0]).toMatchObject({ status: "needs_review", zoomMeetingId: "12345678901", googleEventId: null });
     const recovered = await recoverReservation(database.db, { id: data.id, action: "resume" }, runtime, deps);
     expect(recovered).toMatchObject({ status: "confirmed" });
+    expect(deps.ensureCalendarEvent).toHaveBeenLastCalledWith({}, "refresh", expect.objectContaining({ name: data.name, email: data.email, notes: data.notes, timeZone: data.timeZone }));
     expect(deps.createZoomMeeting).toHaveBeenCalledOnce(); expect(deps.getZoomMeeting).toHaveBeenCalledOnce(); expect(deps.ensureCalendarEvent).toHaveBeenCalledTimes(2);
   });
 

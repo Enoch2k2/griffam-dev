@@ -3,7 +3,25 @@ import { createHash } from "node:crypto";
 import { OAuth2Client } from "google-auth-library";
 import type { CalendarConfig } from "./config";
 
-type CalendarBooking = { id: string; start: string; end: string; joinUrl: string };
+type CalendarBooking = { id: string; start: string; end: string; joinUrl: string; name: string; email: string; notes: string; timeZone: string };
+// Google Calendar descriptions support HTML; keep client-supplied text literal.
+function escapeDescription(value: string) {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+}
+function description(booking: CalendarBooking) {
+  return [
+    "Free 30-minute discovery call",
+    `Client: ${booking.name}`,
+    `Email: ${booking.email}`,
+    `Client time zone: ${booking.timeZone}`,
+    "",
+    "Project notes:",
+    booking.notes.trim() || "No project notes provided.",
+    "",
+    `Join Zoom: ${booking.joinUrl}`,
+    `Booking reference: ${booking.id}`,
+  ].map(escapeDescription).join("\n");
+}
 function failure() { return new Error("Calendar event could not be verified"); }
 export function calendarEventId(bookingId: string) {
   return `gd${createHash("sha256").update(bookingId).digest("hex")}`;
@@ -27,7 +45,7 @@ export async function ensureCalendarEvent(config: CalendarConfig, refreshToken: 
     try { return await get(); } catch (error) { if (status(error) !== 404) throw error; }
     try {
       const response = await oauth.request({ url: base, method: "POST", params: { sendUpdates: "none" }, timeout: 10_000, retry: false, data: {
-        id, summary: "GriffamDev discovery call", visibility: "private", transparency: "opaque", location: booking.joinUrl,
+        id, summary: `Discovery call with ${booking.name.replace(/\s+/g, " ").trim()} — GriffamDev`, description: description(booking), visibility: "private", transparency: "opaque", location: booking.joinUrl,
         start: { dateTime: booking.start }, end: { dateTime: booking.end },
         extendedProperties: { private: { griffamBooking: booking.id } }, reminders: { useDefault: false },
       } });

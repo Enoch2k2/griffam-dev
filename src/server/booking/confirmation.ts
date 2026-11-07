@@ -83,7 +83,10 @@ async function provision(db: Database, claimed: NonNullable<Awaited<ReturnType<t
   }
   try {
     if (!await persistZoom(db, reservation.id, token, meeting)) return pending(reservation.id);
-    const event = await deps.ensureCalendarEvent(runtime.calendar, runtime.refreshToken, { ...slot, joinUrl: meeting.joinUrl });
+    const event = await deps.ensureCalendarEvent(runtime.calendar, runtime.refreshToken, {
+      ...slot, joinUrl: meeting.joinUrl,
+      name: reservation.name, email: reservation.email, notes: reservation.notes, timeZone: reservation.timeZone,
+    });
     if (!await persistCalendar(db, reservation.id, token, event.id)) return pending(reservation.id);
     return await finalize(db, reservation.id, token, runtime, deps);
   } catch {
