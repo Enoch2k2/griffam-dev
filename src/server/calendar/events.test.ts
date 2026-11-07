@@ -4,7 +4,7 @@ vi.mock("google-auth-library", () => ({ OAuth2Client: class { request = mocks.re
 import { calendarEventId, ensureCalendarEvent } from "./events";
 import type { CalendarConfig } from "./config";
 const config = { googleClientId: "client", googleClientSecret: "secret" } as CalendarConfig;
-const booking = { id: "booking-1", start: "2026-12-01T15:00:00Z", end: "2026-12-01T15:30:00Z", joinUrl: "https://zoom.us/j/12345678901?pwd=participant" };
+const booking = { id: "booking-1", start: "2026-12-01T15:00:00Z", end: "2026-12-01T15:30:00Z", joinUrl: "https://zoom.us/j/12345678901?pwd=participant", name: "Alex Client", email: "alex@example.com", notes: "Build a portfolio.\nDiscuss the launch timeline.", timeZone: "America/Chicago" };
 const event = { id: calendarEventId(booking.id), status: "confirmed", start: { dateTime: booking.start }, end: { dateTime: booking.end }, location: booking.joinUrl, extendedProperties: { private: { griffamBooking: booking.id } } };
 beforeEach(() => { mocks.request.mockReset(); vi.stubEnv("CALENDAR_EVENTS_ENABLED", "true"); });
 afterEach(() => vi.unstubAllEnvs());
@@ -14,6 +14,23 @@ it("inserts one private deterministic event without attendees or invitation emai
   expect(event.id).toMatch(/^[0-9a-v]{5,1024}$/);
   expect(mocks.request.mock.calls[1][0]).toMatchObject({ method: "POST", retry: false, params: { sendUpdates: "none" }, data: { id: event.id, visibility: "private", transparency: "opaque" } });
   expect(mocks.request.mock.calls[1][0].data).not.toHaveProperty("attendees");
+  expect(mocks.request.mock.calls[1][0].data).toMatchObject({
+    summary: "Discovery call with Alex Client — GriffamDev",
+    description: `Free 30-minute discovery call\nClient: Alex Client\nEmail: alex@example.com\nClient time zone: America/Chicago\n\nProject notes:\nBuild a portfolio.\nDiscuss the launch timeline.\n\nJoin Zoom: ${booking.joinUrl}\nBooking reference: booking-1`,
+  });
+});
+it("escapes client markup, preserves note lines, and keeps the title on one line", async () => {
+  mocks.request.mockRejectedValueOnce({ response: { status: 404 } }).mockResolvedValueOnce({ data: event });
+  await ensureCalendarEvent(config, "refresh", { ...booking, name: "Alex\nClient", notes: '<a href="https://example.com">Click & go</a>\nNext line' });
+  const data = mocks.request.mock.calls[1][0].data;
+  expect(data.summary).toBe("Discovery call with Alex Client — GriffamDev");
+  expect(data.description).toContain('&lt;a href=&quot;https://example.com&quot;&gt;Click &amp; go&lt;/a&gt;\nNext line');
+  expect(data.description).not.toContain("<a");
+});
+it("provides a useful description when project notes are empty", async () => {
+  mocks.request.mockRejectedValueOnce({ response: { status: 404 } }).mockResolvedValueOnce({ data: event });
+  await ensureCalendarEvent(config, "refresh", { ...booking, notes: "  " });
+  expect(mocks.request.mock.calls[1][0].data.description).toContain("No project notes provided.");
 });
 it("returns an existing matching event without writing", async () => {
   mocks.request.mockResolvedValueOnce({ data: event });
