@@ -44,8 +44,9 @@ export async function ensureCalendarEvent(config: CalendarConfig, refreshToken: 
     const get = async () => verify((await oauth.request({ url: `${base}/${id}`, method: "GET", timeout: 10_000, retry: false })).data, booking);
     try { return await get(); } catch (error) { if (status(error) !== 404) throw error; }
     try {
-      const response = await oauth.request({ url: base, method: "POST", params: { sendUpdates: "none" }, timeout: 10_000, retry: false, data: {
+      const response = await oauth.request({ url: base, method: "POST", params: { sendUpdates: "all" }, timeout: 10_000, retry: false, data: {
         id, summary: `Discovery call with ${booking.name.replace(/\s+/g, " ").trim()} — GriffamDev`, description: description(booking), visibility: "private", transparency: "opaque", location: booking.joinUrl,
+        attendees: [{ email: booking.email }],
         start: { dateTime: booking.start }, end: { dateTime: booking.end },
         extendedProperties: { private: { griffamBooking: booking.id } }, reminders: { useDefault: false },
       } });

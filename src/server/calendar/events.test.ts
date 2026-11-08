@@ -8,12 +8,11 @@ const booking = { id: "booking-1", start: "2026-12-01T15:00:00Z", end: "2026-12-
 const event = { id: calendarEventId(booking.id), status: "confirmed", start: { dateTime: booking.start }, end: { dateTime: booking.end }, location: booking.joinUrl, extendedProperties: { private: { griffamBooking: booking.id } } };
 beforeEach(() => { mocks.request.mockReset(); vi.stubEnv("CALENDAR_EVENTS_ENABLED", "true"); });
 afterEach(() => vi.unstubAllEnvs());
-it("inserts one private deterministic event without attendees or invitation emails", async () => {
+it("inserts one private deterministic event and emails the calendar invitation to the client", async () => {
   mocks.request.mockRejectedValueOnce({ response: { status: 404 } }).mockResolvedValueOnce({ data: event });
   await expect(ensureCalendarEvent(config, "refresh", booking)).resolves.toEqual({ id: event.id });
   expect(event.id).toMatch(/^[0-9a-v]{5,1024}$/);
-  expect(mocks.request.mock.calls[1][0]).toMatchObject({ method: "POST", retry: false, params: { sendUpdates: "none" }, data: { id: event.id, visibility: "private", transparency: "opaque" } });
-  expect(mocks.request.mock.calls[1][0].data).not.toHaveProperty("attendees");
+  expect(mocks.request.mock.calls[1][0]).toMatchObject({ method: "POST", retry: false, params: { sendUpdates: "all" }, data: { id: event.id, visibility: "private", transparency: "opaque", attendees: [{ email: booking.email }] } });
   expect(mocks.request.mock.calls[1][0].data).toMatchObject({
     summary: "Discovery call with Alex Client — GriffamDev",
     description: `Free 30-minute discovery call\nClient: Alex Client\nEmail: alex@example.com\nClient time zone: America/Chicago\n\nProject notes:\nBuild a portfolio.\nDiscuss the launch timeline.\n\nJoin Zoom: ${booking.joinUrl}\nBooking reference: booking-1`,
