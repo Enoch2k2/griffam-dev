@@ -64,6 +64,20 @@
       "when": 1793955304326,
       "tag": "0008_booking_request_budget",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794122702555,
+      "tag": "0009_pale_terror",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794122928900,
+      "tag": "0010_whole_romulus",
+      "breakpoints": true
     }
   ]
 }

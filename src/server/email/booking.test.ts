@@ -5,6 +5,7 @@ const config = { apiKey: "test", from: "hello@example.com", owner: "owner@exampl
 const data = {
   id: "booking-id", email: "visitor@example.com", start: "2026-11-09T15:00:00Z", end: "2026-11-09T15:30:00Z",
   timeZone: "America/Chicago", joinUrl: "https://us02web.zoom.us/j/123456789?pwd=participant-passcode",
+  managementUrl: "https://example.com/booking/manage?token=example-capability-token",
 };
 
 it("creates deterministic recipient and owner confirmations with the requested local time", () => {
@@ -18,6 +19,9 @@ it("creates deterministic recipient and owner confirmations with the requested l
   expect(jobs[1].payload.text).toContain("9:30 AM");
   expect(jobs[1].payload.text).toContain("America/Chicago");
   expect(jobs[1].payload.text).toContain(data.joinUrl);
+  expect(jobs[1].payload.text).toContain(data.managementUrl);
+  expect(jobs[1].payload.text).toContain("reminder 24 hours before");
+  expect(jobs[1].payload.text).toContain("until 24 hours before");
   expect(jobs[0].payload.text).toContain("https://example.com/admin/bookings");
 });
 

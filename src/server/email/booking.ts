@@ -11,6 +11,7 @@ export type BookingEmailData = {
   end: string;
   timeZone: string;
   joinUrl: string;
+  managementUrl: string;
 };
 
 export function bookingEmails(data: BookingEmailData, config: EmailConfig) {
@@ -46,7 +47,7 @@ export function bookingEmails(data: BookingEmailData, config: EmailConfig) {
       payload: {
         from: config.from, to: [data.email], reply_to: config.owner,
         subject: "Your GriffamDev discovery call is confirmed",
-        text: `Your free 30-minute discovery call with Enoch Griffith is confirmed.\n\n${details}\n\nKeep this meeting link private. If you need to change or cancel your call, reply to this email.\n\nEnoch Griffith\nFull Stack Software Engineer · GriffamDev`,
+        text: `Your free 30-minute discovery call with Enoch Griffith is confirmed.\n\n${details}\n\nKeep this meeting link private. You can manage or cancel your booking here:\n${data.managementUrl}\n\nWe’ll send you a reminder 24 hours before the call. Cancellation is available until 24 hours before the call.\n\nEnoch Griffith\nFull Stack Software Engineer · GriffamDev`,
       },
     },
   ] satisfies { id: string; kind: string; payload: EmailPayload }[];
