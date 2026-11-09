@@ -2,7 +2,7 @@ import "server-only";
 import { randomUUID } from "node:crypto";
 import { and, asc, eq, lte, or, sql } from "drizzle-orm";
 import type { Database } from "@/server/db/connection";
-import { emailJob } from "@/server/db/schema";
+import { bookingReservation, emailJob } from "@/server/db/schema";
 import { sendEmail } from "./provider";
 
 // Resend keeps idempotency keys for 24h. Stop automatic retries after 23h,
@@ -40,12 +40,23 @@ export async function drainEmail(db: Database, apiKey: string, send = sendEmail,
     if (!claim) break;
     if (claim.review) { counts.review++; continue; }
     const { job } = claim;
+    if (job.kind === "booking-reminder" && job.bookingId) {
+      const [booking] = await db.select({ status: bookingReservation.status }).from(bookingReservation).where(eq(bookingReservation.id, job.bookingId));
+      if (booking?.status !== "confirmed") {
+        await db.update(emailJob).set({ status: "cancelled", leaseUntil: null, leaseToken: null, lastError: "booking_not_confirmed" })
+          .where(and(eq(emailJob.id, job.id), eq(emailJob.leaseToken, job.leaseToken!)));
+        continue;
+      }
+    }
     const result = await send(job.payload, job.id, apiKey);
     const status = result.status === "retry" ? (job.attempts >= 8 ? "review" : "pending") : result.status;
     const delaySeconds = Math.min(3600, 60 * 2 ** job.attempts);
+    const payload = result.status === "accepted" && ["booking-confirmation", "booking-reminder"].includes(job.kind)
+      ? { ...job.payload, text: job.payload.text.replace(/([?&]token=)[A-Za-z0-9_-]{43}/g, "$1[delivered]") }
+      : job.payload;
     // Fencing token prevents a late worker from overwriting a recovered lease.
     const updated = await db.update(emailJob).set({
-      status, leaseUntil: null, leaseToken: null,
+      status, payload, leaseUntil: null, leaseToken: null,
       providerId: result.status === "accepted" ? result.id : null,
       lastError: result.status === "accepted" ? null : result.error,
       availableAt: sql`now() + ${delaySeconds} * interval '1 second'`,
