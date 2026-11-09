@@ -65,13 +65,17 @@ Google request must never be represented by an empty busy list in the public flo
 2. Visitor calendar, timezone display, details/review flow and transactional slot
    reservations. Recheck external conflicts; never claim atomicity across Google
    Calendar and PostgreSQL. Add idempotent event creation and recovery/reconciliation.
-3. Booking confirmation emails through the existing outbox, secure management links,
-   cancellation/rescheduling, reminders and failure recovery.
-4. End-to-end provider and race tests before enabling public booking.
+3. Confirmation email, secure expiring management links, Zoom/Calendar cancellation,
+   cancellation notice, and a durable 24-hour reminder are implemented on the current
+   stacked PR. Rescheduling, admin recovery for partial cancellations, and live provider
+   reconciliation remain.
+4. Verify migrations and run disposable-database provider/race tests, then complete one
+   controlled real-provider booking/cancellation before public launch.
 
-Still to confirm: cancellation/rescheduling deadline, reminder schedule, and which
-additional calendars block availability. Enoch selected a separate Zoom meeting per
-booking; see [Zoom preparation](../zoom-booking.md). The browsing horizon is 30 days.
+Confirmed: cancellations require at least 24 hours' notice; reminders go out 24 hours
+before calls; the existing worker polls every 15 minutes. Enoch selected a separate Zoom
+meeting per booking; see [Zoom preparation](../zoom-booking.md). The browsing horizon is
+30 days. Additional calendars remain an open question.
 
 ## Deployment and validation
 

@@ -36,7 +36,7 @@ describe.skipIf(!testURL)("booking confirmation orchestration", () => {
   beforeEach(async () => { await database.pool.query("truncate email_job, booking_reservation, booking_request_limit"); });
   afterAll(async () => { await database?.pool.end(); if (control) { await control.query(`DROP DATABASE IF EXISTS "${name}"`); await control.end(); } });
 
-  it("confirms once, persists both provider identities, atomically enqueues two emails and makes retries read-only", async () => {
+  it("confirms once, persists both provider identities, atomically enqueues confirmation and reminder jobs and makes retries read-only", async () => {
     const data = input(); const deps = dependencies();
     const first = await confirmReservation(database.db, data, runtime, deps);
     expect(first).toMatchObject({ status: "confirmed", id: data.id, emailQueued: true });
@@ -44,10 +44,10 @@ describe.skipIf(!testURL)("booking confirmation orchestration", () => {
     expect(deps.createZoomMeeting).toHaveBeenCalledOnce(); expect(deps.ensureCalendarEvent).toHaveBeenCalledOnce(); expect(deps.scheduleBookingEmails).toHaveBeenCalledOnce();
     const [saved] = await database.db.select().from(bookingReservation).where(eq(bookingReservation.id, data.id));
     expect(saved).toMatchObject({ status: "confirmed", zoomMeetingId: "12345678901", googleEventId: "google-event", managementTokenHash: expect.stringMatching(/^[a-f0-9]{64}$/), managementTokenExpiresAt: saved.endsAt });
-    expect(await database.db.select().from(emailJob)).toHaveLength(2);
+    expect(await database.db.select().from(emailJob)).toHaveLength(3);
     const retry = await confirmReservation(database.db, data, runtime, deps);
     expect(retry).toMatchObject({ status: "confirmed", id: data.id });
-    expect(deps.createZoomMeeting).toHaveBeenCalledOnce(); expect(await database.db.select().from(emailJob)).toHaveLength(2);
+    expect(deps.createZoomMeeting).toHaveBeenCalledOnce(); expect(await database.db.select().from(emailJob)).toHaveLength(3);
   });
 
   it("allows only one provisioner for concurrent duplicate submissions", async () => {

@@ -78,6 +78,13 @@
       "when": 1794122928900,
       "tag": "0010_whole_romulus",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794188754061,
+      "tag": "0011_pale_electro",
+      "breakpoints": true
     }
   ]
 }

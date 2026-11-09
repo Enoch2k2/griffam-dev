@@ -61,3 +61,17 @@ export async function getZoomMeeting(config: ZoomConfig, meetingId: string, expe
     return verified(data, config, expected, meetingId);
   } catch { throw failure(); }
 }
+
+export async function cancelZoomMeeting(config: ZoomConfig, meetingId: string) {
+  try {
+    if (!/^\d{9,15}$/.test(meetingId)) throw failure();
+    const token = await accessToken(config);
+    const response = await fetch(`https://api.zoom.us/v2/meetings/${meetingId}`, {
+      method: "DELETE", headers: { Authorization: `Bearer ${token}` },
+      redirect: "error", cache: "no-store", signal: AbortSignal.timeout(10_000),
+    });
+    // Zoom reports a missing meeting as 404, which means a prior cancellation
+    // succeeded and makes this operation safe to retry.
+    if (!response.ok && response.status !== 404) throw failure();
+  } catch { throw failure(); }
+}
