@@ -52,7 +52,7 @@ export async function drainEmail(db: Database, apiKey: string, send = sendEmail,
     const status = result.status === "retry" ? (job.attempts >= 8 ? "review" : "pending") : result.status;
     const delaySeconds = Math.min(3600, 60 * 2 ** job.attempts);
     const payload = result.status === "accepted" && ["booking-confirmation", "booking-reminder"].includes(job.kind)
-      ? { ...job.payload, text: job.payload.text.replace(/([?&]token=)[A-Za-z0-9_-]{43}/g, "$1[delivered]") }
+      ? { ...job.payload, text: job.payload.text.replace(/([?&#]token=)[A-Za-z0-9_-]{43}/g, "$1[delivered]") }
       : job.payload;
     // Fencing token prevents a late worker from overwriting a recovered lease.
     const updated = await db.update(emailJob).set({
