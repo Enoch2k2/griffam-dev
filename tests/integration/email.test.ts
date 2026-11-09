@@ -34,7 +34,7 @@ describe.skipIf(!testURL)("transactional inquiry outbox", () => {
     const data = input();
     expect(await Promise.all(Array.from({ length: 5 }, () => saveInquiry(database.db, data, config)))).toEqual(Array(5).fill("queued"));
     const jobs = await database.db.select().from(emailJob);
-    expect(jobs).toHaveLength(3);
+    expect(jobs).toHaveLength(2);
     expect(await saveInquiry(database.db, data, { ...config, owner: "changed@example.com" })).toBe("queued");
     expect(await database.db.select().from(emailJob)).toEqual(jobs);
   });
@@ -125,7 +125,7 @@ describe.skipIf(!testURL)("transactional inquiry outbox", () => {
     await database.db.transaction(tx => enqueueBookingEmails(tx, data, config));
     await database.db.transaction(tx => enqueueBookingEmails(tx, data, { ...config, owner: "changed@example.com" }));
     const jobs = await database.db.select().from(emailJob).where(eq(emailJob.bookingId, data.id));
-    expect(jobs).toHaveLength(2);
+    expect(jobs).toHaveLength(3);
     expect(jobs.every(job => job.inquiryId === null)).toBe(true);
     expect(jobs.find(job => job.kind === "booking-owner")?.payload.to).toEqual([config.owner]);
     const send = vi.fn().mockResolvedValue({ status: "accepted", id: "booking-provider-id" });
@@ -143,7 +143,8 @@ describe.skipIf(!testURL)("transactional inquiry outbox", () => {
     await insertBooking(data);
     await database.db.transaction(tx => enqueueBookingEmails(tx, data, config));
     await database.db.update(bookingReservation).set({ status: "cancelled" }).where(eq(bookingReservation.id, data.id));
-    await database.db.update(emailJob).set({ availableAt: new Date(0) }).where(eq(emailJob.id, `booking-reminder/${data.id}`));
+    await database.db.update(emailJob).set({ status: "accepted" }).where(eq(emailJob.bookingId, data.id));
+    await database.db.update(emailJob).set({ status: "pending", availableAt: new Date(0) }).where(eq(emailJob.id, `booking-reminder/${data.id}`));
     const send = vi.fn();
     await drainEmail(database.db, "key", send, undefined, data.id);
     expect(send).not.toHaveBeenCalled();
