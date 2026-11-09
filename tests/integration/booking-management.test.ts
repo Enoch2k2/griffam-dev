@@ -70,7 +70,12 @@ describe.skipIf(!testURL)("client booking management", () => {
     expect(await cancelManagedBooking(database.db, token.token, runtime, failing)).toEqual({ status: "pending" });
     expect((await database.db.select().from(bookingReservation).where(eq(bookingReservation.id, id)))[0].status).toBe("cancellation_pending");
     const [pending] = await database.db.select().from(bookingReservation).where(eq(bookingReservation.id, id));
-    await database.db.update(bookingReservation).set({ status: "confirmed", startsAt: new Date(Date.now() + 23 * 60 * 60_000) }).where(eq(bookingReservation.id, id));
+    const cutoffStart = new Date(Date.now() + 23 * 60 * 60_000);
+    await database.db.update(bookingReservation).set({
+      status: "confirmed", startsAt: cutoffStart,
+      endsAt: new Date(cutoffStart.getTime() + 30 * 60_000),
+      occupiedUntil: new Date(cutoffStart.getTime() + 60 * 60_000),
+    }).where(eq(bookingReservation.id, id));
     const blocked = { cancelZoomMeeting: vi.fn(), cancelCalendarEvent: vi.fn() };
     expect(await cancelManagedBooking(database.db, token.token, runtime, blocked)).toEqual({ status: "cutoff" });
     expect(blocked.cancelZoomMeeting).not.toHaveBeenCalled();
