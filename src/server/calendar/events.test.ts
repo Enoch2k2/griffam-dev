@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ request: vi.fn(), setCredentials: vi.fn() }));
 vi.mock("google-auth-library", () => ({ OAuth2Client: class { request = mocks.request; setCredentials = mocks.setCredentials; } }));
-import { calendarEventId, ensureCalendarEvent } from "./events";
+import { calendarEventId, cancelCalendarEvent, ensureCalendarEvent } from "./events";
 import type { CalendarConfig } from "./config";
 const config = { googleClientId: "client", googleClientSecret: "secret" } as CalendarConfig;
 const booking = { id: "booking-1", start: "2026-12-01T15:00:00Z", end: "2026-12-01T15:30:00Z", joinUrl: "https://zoom.us/j/12345678901?pwd=participant", name: "Alex Client", email: "alex@example.com", notes: "Build a portfolio.\nDiscuss the launch timeline.", timeZone: "America/Chicago" };
@@ -58,4 +58,19 @@ it("fails closed when disabled, unauthorized or unable to recover", async () => 
   mocks.request.mockRejectedValueOnce({ response: { status: 403 } });
   await expect(ensureCalendarEvent(config, "refresh", booking)).rejects.toThrow("Calendar event could not be verified");
   expect(mocks.request).toHaveBeenCalledTimes(1);
+});
+it("cancels only its own Calendar event and verifies the attendee cancellation", async () => {
+  mocks.request.mockResolvedValueOnce({ data: event }).mockResolvedValueOnce({ data: {} }).mockResolvedValueOnce({ data: { ...event, status: "cancelled" } });
+  await expect(cancelCalendarEvent(config, "refresh", event.id, booking.id)).resolves.toBeUndefined();
+  expect(mocks.request.mock.calls.map(([request]) => request.method)).toEqual(["GET", "PATCH", "GET"]);
+  expect(mocks.request.mock.calls[1][0]).toMatchObject({ params: { sendUpdates: "all" }, data: { status: "cancelled" } });
+});
+it("treats missing or already-cancelled matching events as success, and refuses unrelated events", async () => {
+  mocks.request.mockRejectedValueOnce({ response: { status: 404 } });
+  await expect(cancelCalendarEvent(config, "refresh", event.id, booking.id)).resolves.toBeUndefined();
+  mocks.request.mockReset().mockResolvedValueOnce({ data: { ...event, status: "cancelled" } });
+  await expect(cancelCalendarEvent(config, "refresh", event.id, booking.id)).resolves.toBeUndefined();
+  mocks.request.mockReset().mockResolvedValueOnce({ data: { ...event, extendedProperties: {} } });
+  await expect(cancelCalendarEvent(config, "refresh", event.id, booking.id)).rejects.toThrow();
+  expect(mocks.request).toHaveBeenCalledOnce();
 });

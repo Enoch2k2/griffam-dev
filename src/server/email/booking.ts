@@ -33,7 +33,7 @@ export function bookingEmails(data: BookingEmailData, config: EmailConfig) {
   const details = `When: ${format.format(start)} – ${format.format(end)}\nTime zone: ${data.timeZone}\nJoin Zoom: ${url.href}`;
   // Do not reflect names or notes into the recipient's mailbox: those may contain
   // arbitrary links. Both immutable payloads contain only validated meeting details.
-  return [
+  const jobs = [
     {
       id: `booking-owner/${data.id}`, kind: "booking-owner",
       payload: {
@@ -50,14 +50,41 @@ export function bookingEmails(data: BookingEmailData, config: EmailConfig) {
         text: `Your free 30-minute discovery call with Enoch Griffith is confirmed.\n\n${details}\n\nKeep this meeting link private. You can manage or cancel your booking here:\n${data.managementUrl}\n\nWe’ll send you a reminder 24 hours before the call. Cancellation is available until 24 hours before the call.\n\nEnoch Griffith\nFull Stack Software Engineer · GriffamDev`,
       },
     },
+    {
+      id: `booking-reminder/${data.id}`, kind: "booking-reminder",
+      payload: {
+        from: config.from, to: [data.email], reply_to: config.owner,
+        subject: "Reminder: your GriffamDev discovery call is tomorrow",
+        text: `This is a reminder that your free 30-minute discovery call with Enoch Griffith is tomorrow.\n\n${details}\n\nNeed to cancel? Use your secure booking link before the 24-hour cutoff:\n${data.managementUrl}\n\nEnoch Griffith\nFull Stack Software Engineer · GriffamDev`,
+      },
+    },
   ] satisfies { id: string; kind: string; payload: EmailPayload }[];
+  return jobs;
 }
 
 type Transaction = Parameters<Parameters<Database["transaction"]>[0]>[0];
 
 // Call inside the transaction that confirms the reservation; delivery happens later.
 export async function enqueueBookingEmails(tx: Transaction, data: BookingEmailData, config: EmailConfig) {
+  const scheduledReminderAt = Date.parse(data.start) - 24 * 60 * 60_000;
+  // The site requires 24 hours' notice. A visitor booking exactly at that
+  // boundary should receive the reminder on the next worker sweep, never inline
+  // with the confirmation.
+  const reminderAt = new Date(Math.max(scheduledReminderAt, Date.now() + 60_000));
   await tx.insert(emailJob).values(bookingEmails(data, config).map(job => ({
     ...job, bookingId: data.id,
+    ...(job.kind === "booking-reminder" ? { availableAt: reminderAt } : {}),
   }))).onConflictDoNothing({ target: emailJob.id });
+}
+
+export async function enqueueBookingCancellation(tx: Transaction, data: { id: string; email: string; start: string; timeZone: string }, config: EmailConfig) {
+  const when = new Intl.DateTimeFormat("en-US", { timeZone: data.timeZone, dateStyle: "full", timeStyle: "short" }).format(new Date(data.start));
+  await tx.insert(emailJob).values({
+    id: `booking-cancellation/${data.id}`, bookingId: data.id, kind: "booking-cancellation",
+    payload: {
+      from: config.from, to: [data.email], reply_to: config.owner,
+      subject: "Your GriffamDev discovery call was cancelled",
+      text: `Your discovery call scheduled for ${when} (${data.timeZone}) has been cancelled. The Zoom meeting and calendar invitation have also been cancelled.\n\nEnoch Griffith\nFull Stack Software Engineer · GriffamDev`,
+    },
+  }).onConflictDoNothing({ target: emailJob.id });
 }
