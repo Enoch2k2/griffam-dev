@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { createZoomMeeting, getZoomMeeting, readZoomConfig } from "./meetings";
+import { cancelZoomMeeting, createZoomMeeting, getZoomMeeting, readZoomConfig } from "./meetings";
 const config = { accountId: "account", clientId: "client", clientSecret: "secret", hostUserId: "host" };
 const slot = { id: "booking-1", start: "2026-12-01T15:00:00Z", end: "2026-12-01T15:30:00Z" };
 const meeting = { id: 12345678901, host_id: "host", type: 2, agenda: "GriffamDev booking booking-1", start_time: slot.start, duration: 30, join_url: "https://us02web.zoom.us/j/12345678901?pwd=participant", start_url: "SECRET-HOST-URL" };
@@ -38,4 +38,18 @@ it("stops on failed credentials without attempting meeting creation", async () =
   fetcher.mockResolvedValueOnce(response({ error: "private detail" }, 401));
   await expect(createZoomMeeting(config, slot)).rejects.toThrow("Zoom meeting could not be verified");
   expect(fetcher).toHaveBeenCalledTimes(1);
+});
+it("cancels a Zoom meeting and treats an already-missing meeting as success", async () => {
+  fetcher.mockResolvedValueOnce(response({ access_token: "token" })).mockResolvedValueOnce(new Response(null, { status: 204 }));
+  await expect(cancelZoomMeeting(config, "12345678901")).resolves.toBeUndefined();
+  expect(fetcher.mock.calls[1][0]).toBe("https://api.zoom.us/v2/meetings/12345678901");
+  expect(fetcher.mock.calls[1][1].method).toBe("DELETE");
+  fetcher.mockReset().mockResolvedValueOnce(response({ access_token: "token" })).mockResolvedValueOnce(response({}, 404));
+  await expect(cancelZoomMeeting(config, "12345678901")).resolves.toBeUndefined();
+});
+it("rejects invalid meeting IDs and unverified cancellation responses", async () => {
+  await expect(cancelZoomMeeting(config, "not-a-meeting")).rejects.toThrow("Zoom meeting could not be verified");
+  expect(fetcher).not.toHaveBeenCalled();
+  fetcher.mockResolvedValueOnce(response({ access_token: "token" })).mockResolvedValueOnce(response({}, 500));
+  await expect(cancelZoomMeeting(config, "12345678901")).rejects.toThrow("Zoom meeting could not be verified");
 });

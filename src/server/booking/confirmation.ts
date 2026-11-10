@@ -61,7 +61,7 @@ async function finalize(db: Database, id: string, token: string, runtime: Runtim
     const [current] = await tx.select().from(table).where(and(eq(table.id, id), eq(table.status, "provisioning"), eq(table.provisioningToken, token))).for("update");
     if (!current?.zoomMeetingId || !current.zoomJoinUrl || !current.googleEventId) return null;
     const management = createBookingManagementToken();
-    await enqueueBookingEmails(tx, { id, email: current.email, start: current.startsAt.toISOString(), end: current.endsAt.toISOString(), timeZone: current.timeZone, joinUrl: current.zoomJoinUrl, managementUrl: `${runtime.email.origin}/booking/manage?token=${management.token}` }, runtime.email);
+    await enqueueBookingEmails(tx, { id, email: current.email, start: current.startsAt.toISOString(), end: current.endsAt.toISOString(), timeZone: current.timeZone, joinUrl: current.zoomJoinUrl, managementUrl: `${runtime.email.origin}/booking/manage#token=${management.token}` }, runtime.email);
     const [saved] = await tx.update(table).set({ status: "confirmed", confirmedAt: sql`now()`, expiresAt: current.endsAt, lastError: null, managementTokenHash: management.hash, managementTokenExpiresAt: current.endsAt })
       .where(and(eq(table.id, id), eq(table.status, "provisioning"), eq(table.provisioningToken, token))).returning();
     return saved ?? null;

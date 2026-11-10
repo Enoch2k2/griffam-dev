@@ -109,7 +109,7 @@ describe.skipIf(!testURL)("transactional inquiry outbox", () => {
   const booking = () => ({
     id: randomUUID(), email: "visitor@example.com", start: "2026-11-09T15:00:00Z", end: "2026-11-09T15:30:00Z",
     timeZone: "America/Chicago", joinUrl: "https://us02web.zoom.us/j/123456789?pwd=participant",
-    managementUrl: "https://griffamdev.dev/booking/manage?token=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+    managementUrl: "https://griffamdev.dev/booking/manage#token=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
   });
   async function insertBooking(data: ReturnType<typeof booking>) {
     await database.db.insert(bookingReservation).values({
@@ -125,15 +125,30 @@ describe.skipIf(!testURL)("transactional inquiry outbox", () => {
     await database.db.transaction(tx => enqueueBookingEmails(tx, data, config));
     await database.db.transaction(tx => enqueueBookingEmails(tx, data, { ...config, owner: "changed@example.com" }));
     const jobs = await database.db.select().from(emailJob).where(eq(emailJob.bookingId, data.id));
-    expect(jobs).toHaveLength(2);
+    expect(jobs).toHaveLength(3);
     expect(jobs.every(job => job.inquiryId === null)).toBe(true);
     expect(jobs.find(job => job.kind === "booking-owner")?.payload.to).toEqual([config.owner]);
     const send = vi.fn().mockResolvedValue({ status: "accepted", id: "booking-provider-id" });
     await drainEmail(database.db, "key", send, undefined, data.id);
     expect(send).toHaveBeenCalledTimes(2);
     expect(send.mock.calls.every(call => call[1].endsWith(data.id))).toBe(true);
+    const deliveredConfirmation = (await database.db.select().from(emailJob).where(eq(emailJob.bookingId, data.id))).find(job => job.kind === "booking-confirmation");
+    expect(JSON.stringify(deliveredConfirmation?.payload)).not.toContain("A".repeat(43));
     await drainEmail(database.db, "key", send);
     expect(send).toHaveBeenCalledTimes(4);
+  });
+
+  it("suppresses a reminder when its booking is no longer confirmed", async () => {
+    const data = booking();
+    await insertBooking(data);
+    await database.db.transaction(tx => enqueueBookingEmails(tx, data, config));
+    await database.db.update(bookingReservation).set({ status: "cancelled" }).where(eq(bookingReservation.id, data.id));
+    await database.db.update(emailJob).set({ status: "accepted" }).where(eq(emailJob.bookingId, data.id));
+    await database.db.update(emailJob).set({ status: "pending", availableAt: new Date(0) }).where(eq(emailJob.id, `booking-reminder/${data.id}`));
+    const send = vi.fn();
+    await drainEmail(database.db, "key", send, undefined, data.id);
+    expect(send).not.toHaveBeenCalled();
+    expect((await database.db.select().from(emailJob).where(eq(emailJob.id, `booking-reminder/${data.id}`)))[0].status).toBe("cancelled");
   });
 
   it("rolls back booking confirmation when its email outbox insertion fails", async () => {

@@ -10,7 +10,7 @@ const data = {
 
 it("creates deterministic recipient and owner confirmations with the requested local time", () => {
   const jobs = bookingEmails(data, config);
-  expect(jobs.map(job => job.id)).toEqual(["booking-owner/booking-id", "booking-confirmation/booking-id"]);
+  expect(jobs.map(job => job.id)).toEqual(["booking-owner/booking-id", "booking-confirmation/booking-id", "booking-reminder/booking-id"]);
   expect(jobs).toEqual(bookingEmails(data, config));
   expect(jobs[0].payload.to).toEqual([config.owner]);
   expect(jobs[1].payload.to).toEqual([data.email]);
@@ -23,6 +23,9 @@ it("creates deterministic recipient and owner confirmations with the requested l
   expect(jobs[1].payload.text).toContain("reminder 24 hours before");
   expect(jobs[1].payload.text).toContain("until 24 hours before");
   expect(jobs[0].payload.text).toContain("https://example.com/admin/bookings");
+  expect(jobs[2].payload.to).toEqual([data.email]);
+  expect(jobs[2].payload.text).toContain(data.managementUrl);
+  expect(jobs[2].payload.subject).toContain("tomorrow");
 });
 
 it("does not reflect names, notes, or host credentials into either email", () => {
