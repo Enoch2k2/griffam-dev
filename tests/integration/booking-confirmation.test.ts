@@ -43,7 +43,7 @@ describe.skipIf(!testURL)("booking confirmation orchestration", () => {
     expect(deps.ensureCalendarEvent).toHaveBeenCalledWith({}, "refresh", expect.objectContaining({ name: data.name, email: data.email, notes: data.notes, timeZone: data.timeZone, joinUrl: meeting().joinUrl }));
     expect(deps.createZoomMeeting).toHaveBeenCalledOnce(); expect(deps.ensureCalendarEvent).toHaveBeenCalledOnce(); expect(deps.scheduleBookingEmails).toHaveBeenCalledOnce();
     const [saved] = await database.db.select().from(bookingReservation).where(eq(bookingReservation.id, data.id));
-    expect(saved).toMatchObject({ status: "confirmed", zoomMeetingId: "12345678901", googleEventId: "google-event" });
+    expect(saved).toMatchObject({ status: "confirmed", zoomMeetingId: "12345678901", googleEventId: "google-event", managementTokenHash: expect.stringMatching(/^[a-f0-9]{64}$/), managementTokenExpiresAt: saved.endsAt });
     expect(await database.db.select().from(emailJob)).toHaveLength(2);
     const retry = await confirmReservation(database.db, data, runtime, deps);
     expect(retry).toMatchObject({ status: "confirmed", id: data.id });

@@ -176,9 +176,12 @@ export const bookingReservation = pgTable("booking_reservation", {
   googleEventId: text("google_event_id"),
   lastError: text("last_error"),
   confirmedAt: date("confirmed_at"),
+  managementTokenHash: text("management_token_hash"),
+  managementTokenExpiresAt: date("management_token_expires_at"),
   createdAt: date("created_at").notNull().defaultNow(),
 }, table => [
   index("booking_reservation_email_created_idx").on(table.email, table.createdAt),
+  uniqueIndex("booking_reservation_management_token_hash_idx").on(table.managementTokenHash),
   check("booking_reservation_status", sql`${table.status} in ('held', 'provisioning', 'needs_review', 'confirmed', 'cancelled')`),
   check("booking_reservation_confirmed_effects", sql`${table.status} <> 'confirmed' or (${table.zoomMeetingId} is not null and ${table.zoomJoinUrl} is not null and ${table.googleEventId} is not null and ${table.confirmedAt} is not null)`),
 ]);

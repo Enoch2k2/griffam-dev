@@ -109,6 +109,7 @@ describe.skipIf(!testURL)("transactional inquiry outbox", () => {
   const booking = () => ({
     id: randomUUID(), email: "visitor@example.com", start: "2026-11-09T15:00:00Z", end: "2026-11-09T15:30:00Z",
     timeZone: "America/Chicago", joinUrl: "https://us02web.zoom.us/j/123456789?pwd=participant",
+    managementUrl: "https://griffamdev.dev/booking/manage?token=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
   });
   async function insertBooking(data: ReturnType<typeof booking>) {
     await database.db.insert(bookingReservation).values({

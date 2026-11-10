@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "booking_reservation_management_token_hash_idx" ON "booking_reservation" USING btree ("management_token_hash");
