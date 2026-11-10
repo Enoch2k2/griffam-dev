@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { BOOKING_TIME_ZONE, formatBookingDate, formatBookingTime } from "./time-zone";
 
 type ManagedBooking = { start: string; end: string; timeZone: string; status: string; cancellable: boolean };
 export function BookingManagement() {
@@ -53,8 +54,7 @@ export function BookingManagement() {
     } finally { setBusy(false); }
   }
 
-  const date = booking ? new Intl.DateTimeFormat("en-US", { timeZone: booking.timeZone, dateStyle: "full" }).format(new Date(booking.start)) : "";
-  const time = booking ? new Intl.DateTimeFormat("en-US", { timeZone: booking.timeZone, hour: "numeric", minute: "2-digit", timeZoneName: "short" }) : null;
+  const date = booking ? formatBookingDate(booking.start) : "";
 
   return <section className="page-section booking-management">
     <p className="eyebrow">Your booking</p>
@@ -62,8 +62,8 @@ export function BookingManagement() {
     {booking ? <>
       <div className="booking-management-card">
         <p><strong>{date}</strong></p>
-        <p>{time?.format(new Date(booking.start))} – {time?.format(new Date(booking.end))}</p>
-        <p>Free 30-minute GriffamDev call · {booking.timeZone.replaceAll("_", " ")}</p>
+        <p>{formatBookingTime(booking.start)} – {formatBookingTime(booking.end)}</p>
+        <p>Free 30-minute GriffamDev call · Central Time ({BOOKING_TIME_ZONE}){booking.timeZone !== BOOKING_TIME_ZONE && <><br />Your selected display time zone: {booking.timeZone.replaceAll("_", " ")}</>}</p>
         {booking.status === "cancelled" || done ? <p role="status">This call has been cancelled. A confirmation email is on its way.</p>
           : booking.status === "cancellation_pending" ? <>
             <p role="status">Your cancellation needs another check to finish.</p>

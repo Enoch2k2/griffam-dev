@@ -8,16 +8,16 @@ const data = {
   managementUrl: "https://example.com/booking/manage?token=example-capability-token",
 };
 
-it("creates deterministic recipient and owner confirmations with the requested local time", () => {
-  const jobs = bookingEmails(data, config);
+it("creates deterministic confirmations with Central time regardless of the visitor display zone", () => {
+  const jobs = bookingEmails({ ...data, timeZone: "America/Los_Angeles" }, config);
   expect(jobs.map(job => job.id)).toEqual(["booking-owner/booking-id", "booking-confirmation/booking-id", "booking-reminder/booking-id"]);
   expect(jobs).toEqual(bookingEmails(data, config));
   expect(jobs[0].payload.to).toEqual([config.owner]);
   expect(jobs[1].payload.to).toEqual([data.email]);
   expect(jobs[1].payload.reply_to).toBe(config.owner);
-  expect(jobs[1].payload.text).toContain("9:00 AM");
-  expect(jobs[1].payload.text).toContain("9:30 AM");
-  expect(jobs[1].payload.text).toContain("America/Chicago");
+  expect(jobs[1].payload.text).toContain("9:00 AM CST");
+  expect(jobs[1].payload.text).toContain("9:30 AM CST");
+  expect(jobs[1].payload.text).toContain("Central Time (America/Chicago)");
   expect(jobs[1].payload.text).toContain(data.joinUrl);
   expect(jobs[1].payload.text).toContain(data.managementUrl);
   expect(jobs[1].payload.text).toContain("reminder 24 hours before");

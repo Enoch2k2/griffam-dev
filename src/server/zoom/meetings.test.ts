@@ -17,9 +17,15 @@ it("creates a unique private scheduled meeting and returns only its participant 
   fetcher.mockResolvedValueOnce(response({ access_token: "token" })).mockResolvedValueOnce(response(meeting));
   expect(await createZoomMeeting(config, slot)).toEqual({ id: "12345678901", joinUrl: meeting.join_url });
   const body = JSON.parse(fetcher.mock.calls[1][1].body);
-  expect(body).toMatchObject({ type: 2, agenda: "GriffamDev booking booking-1", duration: 30, settings: { use_pmi: false, waiting_room: true, join_before_host: false, auto_recording: "none" } });
+  expect(body).toMatchObject({ type: 2, agenda: "GriffamDev booking booking-1", start_time: "2026-12-01T09:00:00", timezone: "America/Chicago", duration: 30, settings: { use_pmi: false, waiting_room: true, join_before_host: false, auto_recording: "none" } });
   expect(body.password).toHaveLength(10);
   expect(fetcher.mock.calls[1][1].signal).toBeInstanceOf(AbortSignal);
+});
+it("uses Central Daylight Time for summer Zoom bookings", async () => {
+  const summerSlot = { id: "booking-summer", start: "2026-07-01T15:00:00Z", end: "2026-07-01T15:30:00Z" };
+  fetcher.mockResolvedValueOnce(response({ access_token: "token" })).mockResolvedValueOnce(response({ ...meeting, agenda: "GriffamDev booking booking-summer", start_time: summerSlot.start }));
+  await createZoomMeeting(config, summerSlot);
+  expect(JSON.parse(fetcher.mock.calls[1][1].body)).toMatchObject({ start_time: "2026-07-01T10:00:00", timezone: "America/Chicago" });
 });
 it("never retries an ambiguous create or leaks provider errors", async () => {
   fetcher.mockResolvedValueOnce(response({ access_token: "token" })).mockRejectedValueOnce(new Error("secret-token"));

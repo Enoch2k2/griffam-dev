@@ -12,7 +12,7 @@ it("loads the booking and submits an explicit cancellation using the private tok
   vi.stubGlobal("fetch", fetcher);
   window.history.replaceState(null, "", `/booking/manage#token=${"A".repeat(43)}`);
   render(<BookingManagement />);
-  expect(await screen.findByText("Free 30-minute GriffamDev call · America/Chicago")).toBeInTheDocument();
+  expect(await screen.findByText((_, element) => element?.textContent === "Free 30-minute GriffamDev call · Central Time (America/Chicago)")).toBeInTheDocument();
   await userEvent.click(screen.getByRole("button", { name: "Cancel this call" }));
   await userEvent.click(screen.getByRole("button", { name: "Confirm cancellation" }));
   expect(await screen.findByRole("status")).toHaveTextContent("has been cancelled");
@@ -47,7 +47,7 @@ it("accepts query-token links sent by the earlier confirmation email", async () 
   vi.stubGlobal("fetch", fetcher);
   window.history.replaceState(null, "", `/booking/manage?token=${"D".repeat(43)}`);
   render(<BookingManagement />);
-  expect(await screen.findByText("Free 30-minute GriffamDev call · America/Chicago")).toBeInTheDocument();
+  expect(await screen.findByText((_, element) => element?.textContent === "Free 30-minute GriffamDev call · Central Time (America/Chicago)")).toBeInTheDocument();
   expect(JSON.parse(fetcher.mock.calls[0][1].body)).toEqual({ token: "D".repeat(43), action: "read" });
   expect(window.location.search).toBe("");
 });
