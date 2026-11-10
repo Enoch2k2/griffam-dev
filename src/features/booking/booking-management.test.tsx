@@ -41,3 +41,13 @@ it("offers a retry when a provider cancellation is still pending", async () => {
   await userEvent.click(screen.getByRole("button", { name: "Retry cancellation" }));
   expect(await screen.findByRole("status")).toHaveTextContent("has been cancelled");
 });
+
+it("accepts query-token links sent by the earlier confirmation email", async () => {
+  const fetcher = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ booking }) });
+  vi.stubGlobal("fetch", fetcher);
+  window.history.replaceState(null, "", `/booking/manage?token=${"D".repeat(43)}`);
+  render(<BookingManagement />);
+  expect(await screen.findByText("Free 30-minute GriffamDev call · America/Chicago")).toBeInTheDocument();
+  expect(JSON.parse(fetcher.mock.calls[0][1].body)).toEqual({ token: "D".repeat(43), action: "read" });
+  expect(window.location.search).toBe("");
+});

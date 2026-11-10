@@ -14,9 +14,10 @@ export function BookingManagement() {
 
   useEffect(() => {
     // Email links keep the capability in a URL fragment so it is not sent to
-    // server logs or referrers. Remove it from browser history before lookup.
+    // server logs or referrers. Also accept query tokens from confirmation emails
+    // sent before this format was deployed. Remove either form from history first.
     const fragment = new URLSearchParams(window.location.hash.slice(1));
-    const capability = fragment.get("token") ?? "";
+    const capability = fragment.get("token") ?? new URLSearchParams(window.location.search).get("token") ?? "";
     window.history.replaceState(null, "", "/booking/manage");
     token.current = capability;
     let active = true;
