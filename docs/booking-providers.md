@@ -46,6 +46,11 @@ recording off. Only the participant `join_url` is saved; never copy a host
 `start_url` into a booking or email. Account-enforced Zoom policies can override
 meeting settings, so check them on the live host account before launch.
 
+Booking availability is configured in `America/Chicago`. Zoom meetings, Google
+Calendar event timezone metadata, and booking emails use Central Time; displayed
+abbreviations follow daylight saving time automatically (CST in winter, CDT in
+summer). The booking page may also display the visitor's selected local timezone.
+
 The agenda includes an opaque booking identifier for recovery, without the
 visitor's name, email, or inquiry. A timeout may mean Zoom created a meeting even
 though the app did not receive its response. Do not retry creation blindly. Find

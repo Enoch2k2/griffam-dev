@@ -1,6 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { OAuth2Client } from "google-auth-library";
+import { BOOKING_TIME_ZONE } from "@/features/booking/time-zone";
 import type { CalendarConfig } from "./config";
 
 type CalendarBooking = { id: string; start: string; end: string; joinUrl: string; name: string; email: string; notes: string; timeZone: string };
@@ -13,7 +14,8 @@ function description(booking: CalendarBooking) {
     "Free 30-minute discovery call",
     `Client: ${booking.name}`,
     `Email: ${booking.email}`,
-    `Client time zone: ${booking.timeZone}`,
+    `Booking time zone: Central Time (${BOOKING_TIME_ZONE})`,
+    `Client display time zone: ${booking.timeZone}`,
     "",
     "Project notes:",
     booking.notes.trim() || "No project notes provided.",
@@ -47,7 +49,7 @@ export async function ensureCalendarEvent(config: CalendarConfig, refreshToken: 
       const response = await oauth.request({ url: base, method: "POST", params: { sendUpdates: "all" }, timeout: 10_000, retry: false, data: {
         id, summary: `Discovery call with ${booking.name.replace(/\s+/g, " ").trim()} — GriffamDev`, description: description(booking), visibility: "private", transparency: "opaque", location: booking.joinUrl,
         attendees: [{ email: booking.email }],
-        start: { dateTime: booking.start }, end: { dateTime: booking.end },
+        start: { dateTime: booking.start, timeZone: BOOKING_TIME_ZONE }, end: { dateTime: booking.end, timeZone: BOOKING_TIME_ZONE },
         extendedProperties: { private: { griffamBooking: booking.id } }, reminders: { useDefault: false },
       } });
       return verify(response.data, booking);

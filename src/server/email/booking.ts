@@ -3,6 +3,7 @@ import type { Database } from "@/server/db/connection";
 import { emailJob } from "@/server/db/schema";
 import type { EmailConfig } from "./config";
 import type { EmailPayload } from "./templates";
+import { BOOKING_TIME_ZONE, formatBookingDateTime, formatBookingRange } from "@/features/booking/time-zone";
 
 export type BookingEmailData = {
   id: string;
@@ -27,10 +28,9 @@ export function bookingEmails(data: BookingEmailData, config: EmailConfig) {
   if (!Number.isFinite(start.getTime()) || !Number.isFinite(end.getTime()) || end <= start) {
     throw new Error("Invalid booking time.");
   }
-  const format = new Intl.DateTimeFormat("en-US", {
-    timeZone: data.timeZone, dateStyle: "full", timeStyle: "short",
-  });
-  const details = `When: ${format.format(start)} – ${format.format(end)}\nTime zone: ${data.timeZone}\nJoin Zoom: ${url.href}`;
+  try { new Intl.DateTimeFormat("en-US", { timeZone: data.timeZone }); }
+  catch { throw new Error("Invalid booking time zone."); }
+  const details = `When: ${formatBookingRange(start, end)}\nTime zone: Central Time (${BOOKING_TIME_ZONE})\nJoin Zoom: ${url.href}`;
   // Do not reflect names or notes into the recipient's mailbox: those may contain
   // arbitrary links. Both immutable payloads contain only validated meeting details.
   const jobs = [
@@ -78,13 +78,13 @@ export async function enqueueBookingEmails(tx: Transaction, data: BookingEmailDa
 }
 
 export async function enqueueBookingCancellation(tx: Transaction, data: { id: string; email: string; start: string; timeZone: string }, config: EmailConfig) {
-  const when = new Intl.DateTimeFormat("en-US", { timeZone: data.timeZone, dateStyle: "full", timeStyle: "short" }).format(new Date(data.start));
+  const when = formatBookingDateTime(data.start);
   await tx.insert(emailJob).values({
     id: `booking-cancellation/${data.id}`, bookingId: data.id, kind: "booking-cancellation",
     payload: {
       from: config.from, to: [data.email], reply_to: config.owner,
       subject: "Your GriffamDev discovery call was cancelled",
-      text: `Your discovery call scheduled for ${when} (${data.timeZone}) has been cancelled. The Zoom meeting and calendar invitation have also been cancelled.\n\nEnoch Griffith\nFull Stack Software Engineer · GriffamDev`,
+      text: `Your discovery call scheduled for ${when} Central Time (${BOOKING_TIME_ZONE}) has been cancelled. The Zoom meeting and calendar invitation have also been cancelled.\n\nEnoch Griffith\nFull Stack Software Engineer · GriffamDev`,
     },
   }).onConflictDoNothing({ target: emailJob.id });
 }

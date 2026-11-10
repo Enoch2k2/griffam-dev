@@ -1,5 +1,6 @@
 import "server-only";
 import { randomBytes } from "node:crypto";
+import { BOOKING_TIME_ZONE, toBookingWallTime } from "@/features/booking/time-zone";
 
 export type ZoomConfig = { accountId: string; clientId: string; clientSecret: string; hostUserId: string };
 export type MeetingSlot = { id: string; start: string; end: string };
@@ -46,7 +47,7 @@ export async function createZoomMeeting(config: ZoomConfig, slot: MeetingSlot) {
     const token = await accessToken(config);
     const data = await request(`https://api.zoom.us/v2/users/${encodeURIComponent(config.hostUserId)}/meetings`, {
       method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ topic: "GriffamDev discovery call", type: 2, start_time: new Date(slot.start).toISOString(), duration: minutes, timezone: "UTC", agenda: marker(slot), password: randomBytes(5).toString("hex"),
+      body: JSON.stringify({ topic: "GriffamDev discovery call", type: 2, start_time: toBookingWallTime(slot.start), duration: minutes, timezone: BOOKING_TIME_ZONE, agenda: marker(slot), password: randomBytes(5).toString("hex"),
         settings: { use_pmi: false, waiting_room: true, join_before_host: false, auto_recording: "none", meeting_invitees: [] } }),
     });
     return verified(data, config, slot);

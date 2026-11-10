@@ -12,10 +12,10 @@ it("inserts one private deterministic event and emails the calendar invitation t
   mocks.request.mockRejectedValueOnce({ response: { status: 404 } }).mockResolvedValueOnce({ data: event });
   await expect(ensureCalendarEvent(config, "refresh", booking)).resolves.toEqual({ id: event.id });
   expect(event.id).toMatch(/^[0-9a-v]{5,1024}$/);
-  expect(mocks.request.mock.calls[1][0]).toMatchObject({ method: "POST", retry: false, params: { sendUpdates: "all" }, data: { id: event.id, visibility: "private", transparency: "opaque", attendees: [{ email: booking.email }] } });
+  expect(mocks.request.mock.calls[1][0]).toMatchObject({ method: "POST", retry: false, params: { sendUpdates: "all" }, data: { id: event.id, visibility: "private", transparency: "opaque", attendees: [{ email: booking.email }], start: { dateTime: booking.start, timeZone: "America/Chicago" }, end: { dateTime: booking.end, timeZone: "America/Chicago" } } });
   expect(mocks.request.mock.calls[1][0].data).toMatchObject({
     summary: "Discovery call with Alex Client — GriffamDev",
-    description: `Free 30-minute discovery call\nClient: Alex Client\nEmail: alex@example.com\nClient time zone: America/Chicago\n\nProject notes:\nBuild a portfolio.\nDiscuss the launch timeline.\n\nJoin Zoom: ${booking.joinUrl}\nBooking reference: booking-1`,
+    description: `Free 30-minute discovery call\nClient: Alex Client\nEmail: alex@example.com\nBooking time zone: Central Time (America/Chicago)\nClient display time zone: America/Chicago\n\nProject notes:\nBuild a portfolio.\nDiscuss the launch timeline.\n\nJoin Zoom: ${booking.joinUrl}\nBooking reference: booking-1`,
   });
 });
 it("escapes client markup, preserves note lines, and keeps the title on one line", async () => {

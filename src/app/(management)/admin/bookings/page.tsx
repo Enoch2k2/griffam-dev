@@ -7,6 +7,7 @@ import { getAdminAccess } from "@/server/auth/access";
 import { getDatabase } from "@/server/db";
 import { bookingReservation } from "@/server/db/schema";
 import { BookingRecovery } from "@/features/booking/booking-recovery";
+import { BOOKING_TIME_ZONE, formatBookingDateTime } from "@/features/booking/time-zone";
 import styles from "@/features/booking/bookings-admin.module.css";
 export const metadata = { title: "Bookings" };
 export default function Page() { return <Suspense fallback={<p role="status">Loading bookings…</p>}><Bookings /></Suspense>; }
@@ -21,11 +22,10 @@ async function Bookings() {
     <p>Requests awaiting recovery keep the time blocked so another visitor cannot book over an uncertain meeting.</p>
     {rows.length === 0 && <p>No booking requests yet.</p>}
     <div className={styles.list}>{rows.map(row => {
-      const date = new Intl.DateTimeFormat("en-US", { timeZone: row.timeZone, dateStyle: "full", timeStyle: "short" });
       return <article className={styles.card} key={row.id}>
         <p className="eyebrow">{row.status.replaceAll("_", " ")}{(row.status === "held" || row.status === "provisioning" || row.status === "needs_review") && " · Not confirmed"}</p>
         <h2>{row.name}</h2><p><a href={`mailto:${encodeURIComponent(row.email)}`}>{row.email}</a></p>
-        <p><time dateTime={row.startsAt.toISOString()}>{date.format(row.startsAt)}</time><br />{row.timeZone} · 30-minute Zoom call</p>
+        <p><time dateTime={row.startsAt.toISOString()}>{formatBookingDateTime(row.startsAt)}</time> – <time dateTime={row.endsAt.toISOString()}>{formatBookingDateTime(row.endsAt)}</time><br />Central Time ({BOOKING_TIME_ZONE}) · 30-minute Zoom call{row.timeZone !== BOOKING_TIME_ZONE && <><br />Client display zone: {row.timeZone.replaceAll("_", " ")}</>}</p>
         {row.notes && <p className={styles.notes}>{row.notes}</p>}
         <p className={styles.reference}>Booking reference: {row.id}</p>
         {row.status === "confirmed" && row.zoomJoinUrl && <a className="button secondary" href={row.zoomJoinUrl} target="_blank" rel="noopener noreferrer">Open Zoom meeting</a>}

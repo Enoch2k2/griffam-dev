@@ -15,7 +15,9 @@ export function BookingForm({ slot, timeZone, onChangeTime }: { slot: Slot; time
   const [receipt, setReceipt] = useState<{ joinUrl: string; emailQueued: boolean } | null>(null);
   const submitting = useRef(false);
   const heading = useRef<HTMLHeadingElement>(null);
-  const label = new Intl.DateTimeFormat("en-US", { timeZone, dateStyle: "full", timeStyle: "short" }).format(new Date(slot.start));
+  const labelDate = new Intl.DateTimeFormat("en-US", { timeZone, dateStyle: "full" }).format(new Date(slot.start));
+  const labelTime = new Intl.DateTimeFormat("en-US", { timeZone, hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(slot.start));
+  const label = `${labelDate}, ${labelTime}`;
   useEffect(() => {
     const timer = window.setTimeout(() => {
       try {
