@@ -7,6 +7,7 @@ import { getAdminAccess } from "@/server/auth/access";
 import { getDatabase } from "@/server/db";
 import { bookingReservation } from "@/server/db/schema";
 import { BookingRecovery } from "@/features/booking/booking-recovery";
+import { BookingAdminCancel } from "@/features/booking/booking-admin-cancel";
 import { BOOKING_TIME_ZONE, formatBookingDateTime } from "@/features/booking/time-zone";
 import styles from "@/features/booking/bookings-admin.module.css";
 export const metadata = { title: "Bookings" };
@@ -29,6 +30,7 @@ async function Bookings() {
         {row.notes && <p className={styles.notes}>{row.notes}</p>}
         <p className={styles.reference}>Booking reference: {row.id}</p>
         {row.status === "confirmed" && row.zoomJoinUrl && <a className="button secondary" href={row.zoomJoinUrl} target="_blank" rel="noopener noreferrer">Open Zoom meeting</a>}
+        {(row.status === "confirmed" || row.status === "cancellation_pending") && <BookingAdminCancel id={row.id} retry={row.status === "cancellation_pending"} />}
         {row.lastError && <p className="form-help">Last result: {row.lastError}</p>}
         {row.recoverable && <BookingRecovery id={row.id} hasMeeting={!!row.zoomMeetingId} />}
       </article>;

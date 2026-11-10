@@ -27,6 +27,8 @@ async function findReservation(db: Database, token: unknown) {
   return row ?? null;
 }
 
+type Reservation = NonNullable<Awaited<ReturnType<typeof findReservation>>>;
+
 export async function readManagedBooking(db: Database, token: unknown) {
   const reservation = await findReservation(db, token);
   if (!reservation || !["confirmed", "cancellation_pending", "cancelled"].includes(reservation.status)) return null;
@@ -41,22 +43,37 @@ export async function readManagedBooking(db: Database, token: unknown) {
 }
 
 export async function cancelManagedBooking(db: Database, token: unknown, runtime: ManagementRuntime, dependencies: Partial<CancelDependencies> = {}) {
-  const deps = { ...defaults, ...dependencies };
   const reservation = await findReservation(db, token);
-  if (!reservation || !reservation.googleEventId || !reservation.zoomMeetingId) return { status: "invalid" as const };
-  const now = Date.now();
-  if (reservation.status === "confirmed" && reservation.startsAt.getTime() - now < 24 * 60 * 60_000) return { status: "cutoff" as const };
+  if (!reservation) return { status: "invalid" as const };
+  return cancelReservation(db, reservation, runtime, dependencies, true);
+}
+
+export async function cancelOwnerBooking(db: Database, id: string, runtime: ManagementRuntime, dependencies: Partial<CancelDependencies> = {}) {
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return { status: "invalid" as const };
+  const [reservation] = await db.select().from(bookingReservation).where(eq(bookingReservation.id, id));
+  if (!reservation) return { status: "invalid" as const };
+  return cancelReservation(db, reservation, runtime, dependencies, false);
+}
+
+async function cancelReservation(db: Database, reservation: Reservation, runtime: ManagementRuntime, dependencies: Partial<CancelDependencies>, enforceCutoff: boolean) {
+  const deps = { ...defaults, ...dependencies };
+  if (reservation.status === "cancelled") return { status: "cancelled" as const, id: reservation.id };
+  if (!reservation.googleEventId || !reservation.zoomMeetingId) return { status: "invalid" as const };
+  if (enforceCutoff && reservation.status === "confirmed" && reservation.startsAt.getTime() - Date.now() < 24 * 60 * 60_000) return { status: "cutoff" as const };
   if (reservation.status !== "confirmed" && reservation.status !== "cancellation_pending") {
-    return reservation.status === "cancelled" ? { status: "cancelled" as const, id: reservation.id } : { status: "invalid" as const };
+    return { status: "invalid" as const };
   }
 
   // Commit an explicit pending state before provider calls. Retries can safely
   // finish either provider cancellation if the request or process is interrupted.
   if (reservation.status === "confirmed") {
+    const eligibility = enforceCutoff
+      ? and(eq(bookingReservation.status, "confirmed"), gte(bookingReservation.startsAt, sql`now() + interval '24 hours'`))
+      : eq(bookingReservation.status, "confirmed");
     const [claimed] = await db.update(bookingReservation).set({ status: "cancellation_pending", lastError: "cancellation_in_progress" })
-      .where(and(eq(bookingReservation.id, reservation.id), eq(bookingReservation.status, "confirmed"), gte(bookingReservation.startsAt, sql`now() + interval '24 hours'`)))
+      .where(and(eq(bookingReservation.id, reservation.id), eligibility))
       .returning({ id: bookingReservation.id });
-    if (!claimed) return { status: "cutoff" as const };
+    if (!claimed) return { status: enforceCutoff ? "cutoff" as const : "conflict" as const };
   }
 
   try {
