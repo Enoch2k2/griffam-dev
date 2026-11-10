@@ -69,8 +69,10 @@ Client cancellation uses the expiring link in the confirmation email and is avai
 until 24 hours before the call. The app marks cancellation pending, cancels the Zoom
 meeting and matching Calendar event, then queues a cancellation notice. If either
 provider cannot be verified, the client can retry the same link to finish the
-cancellation. The owner recovery UI for a provider cancellation that remains pending
-after retries is still to be built.
+cancellation. Owners can also cancel or retry a confirmed or partially cancelled
+booking from `/admin/bookings`; owner cancellation can be used inside the client
+24-hour cutoff. Persistent provider failures require checking the Zoom and Calendar
+records before taking manual recovery action.
 
 ## Google Calendar event consent
 
